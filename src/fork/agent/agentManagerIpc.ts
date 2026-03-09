@@ -5,7 +5,7 @@
 
 // [FORK] IPC channel definition for Agent Manager window
 // Used by both electron-main (app.ts) and renderer (command handler)
-/* eslint-disable local/code-import-patterns */
+
 
 export const AGENT_MANAGER_CHANNEL = 'vscode:openAgentManager';
 

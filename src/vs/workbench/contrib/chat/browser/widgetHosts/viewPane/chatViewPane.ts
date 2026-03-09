@@ -514,6 +514,91 @@ export class ChatViewPane extends ViewPane implements IViewWelcomeDelegate {
 			this.createChatTitleControl(chatControlsContainer);
 		}
 
+		// [FORK] OrionIDE - Pear AI Style Agent Sidebar Layout
+		const header = append(chatControlsContainer, $('.orion-side-agent-header'));
+		const toggles = append(header, $('.orion-mode-toggles'));
+
+		const createToggle = (name: string, iconClass: string, isActive: boolean) => {
+			const el = $('.orion-mode-toggle.' + name.toLowerCase() + (isActive ? '.active' : ''));
+			append(el, $(`span.icon.codicon.${iconClass}`));
+			append(el, $('span.text', undefined, name));
+			return el;
+		};
+
+		const agentToggle = createToggle('Agent', 'codicon-hubot', false);
+		const chatToggle = createToggle('Chat', 'codicon-comment-discussion', true);
+		const searchToggle = createToggle('Search', 'codicon-search', false);
+		const memoryToggle = createToggle('Memory', 'codicon-database', false);
+
+		append(toggles, agentToggle);
+		append(toggles, chatToggle);
+		append(toggles, searchToggle);
+		append(toggles, memoryToggle);
+
+		const actions = append(header, $('.orion-side-agent-actions'));
+		['codicon-add', 'codicon-history'].forEach(ic => {
+			append(actions, $(`span.action-icon.codicon.${ic}`));
+		});
+
+		const welcomeScreen = append(chatControlsContainer, $('.orion-welcome-screen'));
+		const clearNode = (node: HTMLElement) => {
+			while (node.firstChild) {
+				node.removeChild(node.firstChild);
+			}
+		};
+
+		const updateWelcome = (mode: string) => {
+			clearNode(welcomeScreen);
+			if (mode === 'Chat') {
+				append(welcomeScreen, $('h2', undefined, 'OrionIDE Chat'));
+				append(welcomeScreen, $('.subtitle', undefined, 'Powered by OrionIDE'));
+				append(welcomeScreen, $('p', undefined, 'Ask questions about the code or make changes.'));
+				const shortcuts = append(welcomeScreen, $('.shortcuts'));
+				append(shortcuts, $('div', undefined, '⌘ + I Make inline edits'));
+				append(shortcuts, $('div', undefined, '⌘ + L Add selection to chat'));
+			} else if (mode === 'Agent') {
+				append(welcomeScreen, $('h2', undefined, 'OrionIDE Coding Agent'));
+				append(welcomeScreen, $('.subtitle', undefined, 'Powered by OrionIDE'));
+				append(welcomeScreen, $('p', undefined, 'Autonomous coding agent that has access to your development environment (with your permission) for a feedback loop to add features, fix bugs, and more.'));
+				const autoApprove = append(welcomeScreen, $('label.auto-approve'));
+				const cb = $('input') as HTMLInputElement;
+				cb.type = 'checkbox';
+				cb.checked = true;
+				append(autoApprove, cb);
+				append(autoApprove, $('span', undefined, ' Auto-approve: Read, Write, Execute, Browser, MCP...'));
+			} else if (mode === 'Search') {
+				append(welcomeScreen, $('h2', undefined, 'OrionIDE Search'));
+				append(welcomeScreen, $('.subtitle', undefined, 'Powered by Perplexity'));
+				append(welcomeScreen, $('p', undefined, 'AI-powered search engine: up-to-date information for docs, libraries, etc. Also good for non-coding specific questions.'));
+			} else if (mode === 'Memory') {
+				append(welcomeScreen, $('h2', undefined, 'OrionIDE Memory'));
+				append(welcomeScreen, $('.subtitle', undefined, 'Local Memory Storage'));
+				append(welcomeScreen, $('p', undefined, 'OrionIDE Memory allows you to add information for OrionIDE to remember. Add memories to personalize your building experience!'));
+				append(welcomeScreen, $('p', undefined, 'No memories yet - Click the button below to add memories.'));
+				append(welcomeScreen, $('button.add-memory-btn', undefined, 'Add Memory'));
+			}
+
+			// Show/hide chat widget container logic if needed
+			if (this._widget && this._widget.domNode) {
+				this._widget.domNode.style.display = mode === 'Memory' ? 'none' : '';
+			}
+		};
+		updateWelcome('Chat');
+
+		const allToggles = [
+			{ el: agentToggle, name: 'Agent' },
+			{ el: chatToggle, name: 'Chat' },
+			{ el: searchToggle, name: 'Search' },
+			{ el: memoryToggle, name: 'Memory' }
+		];
+		allToggles.forEach(t => {
+			t.el.onclick = () => {
+				allToggles.forEach(x => x.el.classList.remove('active'));
+				t.el.classList.add('active');
+				updateWelcome(t.name);
+			};
+		});
+
 		// Chat Widget
 		const scopedInstantiationService = this._register(this.instantiationService.createChild(new ServiceCollection([IContextKeyService, this.scopedContextKeyService])));
 		this._widget = this._register(scopedInstantiationService.createInstance(

@@ -1,9 +1,10 @@
 {
-  "name": "code-oss-dev",
+  "name": "orion-ide",
   "version": "1.112.0",
   "distro": "af92bdba4fde517633b51b6706479a636c8d541a",
+  "description": "OrionIDE — AI-native code editor",
   "author": {
-    "name": "Microsoft Corporation"
+    "name": "Yashu"
   },
   "license": "MIT",
   "main": "./out/main.js",

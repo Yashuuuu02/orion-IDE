@@ -9,7 +9,8 @@
 	max-width: 950px;
 	height: 100%;
 	margin: auto;
-	position: relative; /* Enable absolute positioning for child elements */
+	position: relative;
+	/* Enable absolute positioning for child elements */
 
 	/* 11px when base font is 13px */
 	--vscode-chat-font-size-body-xs: 0.846em;
@@ -2462,14 +2463,12 @@ have to be updated for changes to the rules above, or to support more deeply nes
 
 	/* shimmer animation for shimmer progress */
 	&.shimmer-progress .rendered-markdown.progress-step > p {
-		background: linear-gradient(
-			90deg,
-			var(--vscode-descriptionForeground) 0%,
-			var(--vscode-descriptionForeground) 30%,
-			var(--vscode-chat-thinkingShimmer) 50%,
-			var(--vscode-descriptionForeground) 70%,
-			var(--vscode-descriptionForeground) 100%
-		);
+		background: linear-gradient(90deg,
+				var(--vscode-descriptionForeground) 0%,
+				var(--vscode-descriptionForeground) 30%,
+				var(--vscode-chat-thinkingShimmer) 50%,
+				var(--vscode-descriptionForeground) 70%,
+				var(--vscode-descriptionForeground) 100%);
 		background-size: 400% 100%;
 		background-clip: text;
 		-webkit-background-clip: text;
@@ -2705,7 +2704,8 @@ have to be updated for changes to the rules above, or to support more deeply nes
 	outline: none;
 	border: none;
 
-	.codicon.codicon-file-media, .codicon.codicon-warning {
+	.codicon.codicon-file-media,
+	.codicon.codicon-warning {
 		font-size: 12px;
 		margin-right: 2px;
 	}
@@ -3210,7 +3210,8 @@ have to be updated for changes to the rules above, or to support more deeply nes
 	align-items: center;
 	justify-content: center;
 	height: 100%;
-	margin: -1px -8px -1px 0; /* Extend to button edge, accounting for button padding */
+	margin: -1px -8px -1px 0;
+	/* Extend to button edge, accounting for button padding */
 	padding: 0 4px 0 2px;
 	gap: 4px;
 	cursor: pointer;
@@ -3295,7 +3296,8 @@ have to be updated for changes to the rules above, or to support more deeply nes
 	opacity: 0;
 	transition: opacity 0.15s;
 	color: var(--vscode-descriptionForeground);
-	margin-top: -4px; /* visually center with overlaid top controls */
+	margin-top: -4px;
+	/* visually center with overlaid top controls */
 }
 
 .interactive-item-container.pending-request:hover .chat-pending-drag-handle {
@@ -3346,4 +3348,172 @@ have to be updated for changes to the rules above, or to support more deeply nes
 /* Outline removal except for HC themes */
 .monaco-workbench:not(.hc-black):not(.hc-light) .interactive-list > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row.focused.response {
 	outline: none !important;
+}
+
+/* [FORK] OrionIDE - Pear AI Style Agent Sidebar Layout */
+.orion-side-agent-wrapper {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 450px;
+	margin: 0 0 0 auto;
+	height: 100%;
+	background-color: var(--vscode-editor-background);
+	border-left: 1px solid var(--vscode-editorGroup-border);
+	color: var(--vscode-editor-foreground);
+	font-family: var(--vscode-font-family);
+}
+
+.orion-side-agent-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 16px;
+	height: 60px;
+	box-sizing: border-box;
+}
+
+.orion-mode-toggles {
+	display: flex;
+	gap: 6px;
+	background: var(--vscode-input-background);
+	padding: 4px;
+	border-radius: 20px;
+}
+
+.orion-mode-toggle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 16px;
+	cursor: pointer;
+	font-size: 11px;
+	font-weight: 600;
+	color: #ffffff;
+	transition: all 0.2s ease;
+	height: 24px;
+	box-sizing: border-box;
+}
+
+.orion-mode-toggle .text {
+	display: none;
+}
+
+.orion-mode-toggle.active .text {
+	display: inline-block;
+}
+
+.orion-mode-toggle.agent {
+	background-color: #ec4899;
+}
+
+.orion-mode-toggle.chat {
+	background-color: #22c55e;
+}
+
+.orion-mode-toggle.search {
+	background-color: #06b6d4;
+}
+
+.orion-mode-toggle.memory {
+	background-color: #8b5cf6;
+}
+
+.orion-mode-toggle:not(.active) {
+	width: 24px;
+	padding: 0;
+	justify-content: center;
+	border-radius: 50%;
+	opacity: 0.8;
+}
+
+.orion-mode-toggle:hover:not(.active) {
+	opacity: 1;
+}
+
+.orion-side-agent-actions {
+	display: flex;
+	gap: 12px;
+	color: var(--vscode-icon-foreground);
+	align-items: center;
+}
+
+.orion-side-agent-actions .action-icon {
+	cursor: pointer;
+	opacity: 0.8;
+}
+
+.orion-side-agent-actions .action-icon:hover {
+	opacity: 1;
+}
+
+.orion-side-agent-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 0 16px;
+	box-sizing: border-box;
+}
+
+.orion-welcome-screen {
+	padding: 30px 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.orion-welcome-screen h2 {
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0 0 4px 0;
+}
+
+.orion-welcome-screen .subtitle {
+	font-size: 11px;
+	opacity: 0.5;
+	margin-bottom: 24px;
+}
+
+.orion-welcome-screen p {
+	font-size: 13px;
+	line-height: 1.5;
+	opacity: 0.8;
+	margin: 0 0 16px 0;
+}
+
+.orion-welcome-screen .shortcuts {
+	margin-top: 10px;
+	font-size: 12px;
+	opacity: 0.6;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.orion-welcome-screen label.auto-approve {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	cursor: pointer;
+	margin-top: 20px;
+	opacity: 0.9;
+}
+
+.orion-welcome-screen button.add-memory-btn {
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	border: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	margin-top: 16px;
+	width: 100%;
+}
+
+.orion-chat-widget-container {
+	flex: 1;
+	position: relative;
 }

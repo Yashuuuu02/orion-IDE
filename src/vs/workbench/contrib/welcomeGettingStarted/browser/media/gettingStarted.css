@@ -37,15 +37,24 @@
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStarted {
 	height: 100%;
+	background: radial-gradient(circle at top right, rgba(45, 15, 60, 0.4) 0%, rgba(10, 10, 15, 1) 60%), radial-gradient(circle at bottom left, rgba(10, 30, 40, 0.3) 0%, transparent 50%);
+	background-color: var(--vscode-editor-background);
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer h1 {
-	padding: 5px 0 0;
+	padding: 10px 0 0;
 	margin: 0;
 	border: none;
-	font-weight: normal;
-	font-size: 2.7em;
+	font-weight: 600;
+	font-size: 3.5em;
+	letter-spacing: -0.03em;
 	white-space: nowrap;
+	background: linear-gradient(135deg, #FFF 0%, #AAA 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+	line-height: 1.1em;
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .title {
@@ -55,9 +64,13 @@
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .subtitle {
-	margin-top: .6em;
-	font-size: 2em;
+	margin-top: 0.2em;
+	font-size: 1.6em;
 	display: block;
+	color: rgba(255, 255, 255, 0.5);
+	font-weight: 300;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
 }
 
 .monaco-workbench.hc-black .part.editor > .content .gettingStartedContainer .subtitle,
@@ -256,7 +269,19 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	padding-right: 24px;
+	padding: 8px 16px;
+	margin-bottom: 4px;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+	cursor: pointer;
+}
+
+.monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideCategories .recently-opened li:hover {
+	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(255, 255, 255, 0.15);
+	transform: translateX(4px);
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideCategories .recently-opened li:hover .recently-opened-delete-button,
@@ -322,8 +347,19 @@
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideCategories .getting-started-category {
 	position: relative;
-	border-radius: 6px;
+	border-radius: 12px;
 	overflow: hidden;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideCategories .getting-started-category:hover {
+	background: rgba(255, 255, 255, 0.07);
+	transform: translateY(-4px);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+	border-color: rgba(255, 255, 255, 0.15);
 }
 
 
@@ -964,22 +1000,22 @@
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer {
-	background: var(--vscode-welcomePage-background);
+	background-color: #07070A !important;
 	color: var(--vscode-foreground);
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .description {
-	color: var(--vscode-descriptionForeground);
-	line-height: 1.4em;
+	color: rgba(255, 255, 255, 0.7);
+	line-height: 1.6em;
 	font-size: 1.4em;
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .category-progress .message {
-	color: var(--vscode-descriptionForeground);
+	color: rgba(255, 255, 255, 0.6);
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideDetails .gettingStartedDetailsContent > .getting-started-footer {
-	color: var(--vscode-descriptionForeground);
+	color: rgba(255, 255, 255, 0.6);
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer .icon-widget {
@@ -995,12 +1031,16 @@
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer button {
-	background: var(--vscode-welcomePage-tileBackground);
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 8px;
+	transition: all 0.2s ease;
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer button:hover {
-	background: var(--vscode-welcomePage-tileHoverBackground);
-	outline-color: var(--vscode-contrastActiveBorder, var(--vscode-focusBorder));
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.2);
+	outline-color: transparent !important;
 }
 
 .monaco-workbench .part.editor > .content .gettingStartedContainer button.expanded:hover {

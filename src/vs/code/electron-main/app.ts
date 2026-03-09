@@ -1466,7 +1466,7 @@ export class CodeApplication extends Disposable {
 		// [FORK] Start Terminal WebSocket bridge for companion apps
 		// Dynamically imported to avoid breaking the build if ws/node-pty are absent
 		// @ts-ignore
-		import('../../../../fork/terminal/wsBridge.js').catch(err =>
+		import('../../../fork/terminal/wsBridge.js').catch(err =>
 			this.logService.error('[FORK] Terminal bridge failed to start:', err)
 		);
 

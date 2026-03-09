@@ -2031,6 +2031,19 @@ export default tseslint.config(
 						} // node module allowed even in /browser/
 					]
 				},
+				{
+					'target': 'src/fork/**',
+					'restrictions': [
+						'vs/base/~',
+						'vs/platform/*/~',
+						'vs/workbench/~',
+						'vs/workbench/services/*/~',
+						'vs/workbench/contrib/*/~',
+						'node-pty',
+						'ws',
+						'*' // allow node modules
+					]
+				},
 			]
 		}
 	},

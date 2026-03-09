@@ -6,7 +6,7 @@
 // [FORK] WebSocket bridge — exposes VS Code's PTY to the companion Next.js app.
 // Listens on ws://localhost:3002/terminal and mirrors I/O with node-pty.
 // Start via dynamic import inside app.ts after Electron app is ready.
-/* eslint-disable local/code-import-patterns */
+
 
 import * as pty from 'node-pty';
 import { WebSocketServer, WebSocket } from 'ws';

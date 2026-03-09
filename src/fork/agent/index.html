@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Manager</title>
   <style>
     /* [FORK] Agent Manager standalone window — loaded when Next.js is not running */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg:        #1e1e1e;
-      --sidebar:   #252526;
-      --border:    #2d2d2d;
-      --accent:    #007acc;
-      --accent-h:  #005fa3;
-      --text:      #cccccc;
-      --muted:     #9d9d9d;
-      --error:     #f44747;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --border: #2d2d2d;
+      --accent: #007acc;
+      --accent-h: #005fa3;
+      --text: #cccccc;
+      --muted: #9d9d9d;
+      --error: #f44747;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -27,7 +34,9 @@
       flex-direction: column;
       overflow: hidden;
       -webkit-user-select: none;
+      user-select: none;
     }
+
     #titlebar {
       height: 35px;
       background: #1f1f1f;
@@ -38,6 +47,7 @@
       -webkit-app-region: drag;
       flex-shrink: 0;
     }
+
     #titlebar h1 {
       font-size: 12px;
       color: var(--muted);
@@ -45,6 +55,7 @@
       letter-spacing: 0.02em;
       pointer-events: none;
     }
+
     #toolbar {
       height: 44px;
       background: var(--sidebar);
@@ -56,6 +67,7 @@
       flex-shrink: 0;
       -webkit-app-region: no-drag;
     }
+
     .session-label {
       font-size: 11px;
       color: var(--muted);
@@ -63,6 +75,7 @@
       letter-spacing: 0.08em;
       margin-right: 4px;
     }
+
     #model-selector {
       background: #2d2d2d;
       border: 1px solid var(--border);
@@ -74,7 +87,12 @@
       outline: none;
       transition: border-color 0.15s;
     }
-    #model-selector:hover, #model-selector:focus { border-color: var(--accent); }
+
+    #model-selector:hover,
+    #model-selector:focus {
+      border-color: var(--accent);
+    }
+
     #clear-btn {
       background: transparent;
       border: 1px solid var(--border);
@@ -86,7 +104,12 @@
       margin-left: auto;
       transition: color 0.12s, border-color 0.12s;
     }
-    #clear-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    #clear-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
     #messages {
       flex: 1;
       overflow-y: auto;
@@ -96,37 +119,72 @@
       gap: 12px;
       scroll-behavior: smooth;
     }
-    #messages::-webkit-scrollbar { width: 6px; }
-    #messages::-webkit-scrollbar-track { background: transparent; }
-    #messages::-webkit-scrollbar-thumb { background: #3c3c3c; border-radius: 3px; }
-    .message { display: flex; flex-direction: column; gap: 4px; max-width: 85%; }
-    .message.user { align-self: flex-end; }
-    .message.assistant { align-self: flex-start; }
+
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: #3c3c3c;
+      border-radius: 3px;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 85%;
+    }
+
+    .message.user {
+      align-self: flex-end;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+    }
+
     .message-bubble {
       padding: 8px 12px;
       border-radius: 8px;
       line-height: 1.5;
       font-size: 13px;
     }
+
     .message.user .message-bubble {
       background: var(--accent);
       color: #fff;
       border-bottom-right-radius: 2px;
     }
+
     .message.assistant .message-bubble {
       background: #2d2d2d;
       color: var(--text);
       border: 1px solid var(--border);
       border-bottom-left-radius: 2px;
     }
-    .message-time { font-size: 10px; color: var(--muted); padding: 0 4px; }
-    .message.user .message-time { text-align: right; }
+
+    .message-time {
+      font-size: 10px;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+
+    .message.user .message-time {
+      text-align: right;
+    }
+
     #input-area {
       padding: 12px;
       border-top: 1px solid var(--border);
       background: var(--bg);
       flex-shrink: 0;
     }
+
     #input-wrapper {
       display: flex;
       align-items: flex-end;
@@ -137,7 +195,11 @@
       padding: 8px 12px;
       transition: border-color 0.15s;
     }
-    #input-wrapper:focus-within { border-color: var(--accent); }
+
+    #input-wrapper:focus-within {
+      border-color: var(--accent);
+    }
+
     #chat-input {
       flex: 1;
       background: transparent;
@@ -150,8 +212,13 @@
       max-height: 120px;
       line-height: 1.5;
       -webkit-user-select: text;
+      user-select: text;
     }
-    #chat-input::placeholder { color: var(--muted); }
+
+    #chat-input::placeholder {
+      color: var(--muted);
+    }
+
     #send-btn {
       background: var(--accent);
       border: none;
@@ -166,8 +233,17 @@
       flex-shrink: 0;
       transition: background 0.15s, transform 0.1s;
     }
-    #send-btn:hover:not(:disabled) { background: var(--accent-h); transform: scale(1.05); }
-    #send-btn:disabled { background: #3c3c3c; cursor: not-allowed; }
+
+    #send-btn:hover:not(:disabled) {
+      background: var(--accent-h);
+      transform: scale(1.05);
+    }
+
+    #send-btn:disabled {
+      background: #3c3c3c;
+      cursor: not-allowed;
+    }
+
     .streaming-cursor {
       display: inline-block;
       width: 8px;
@@ -178,7 +254,13 @@
       vertical-align: text-bottom;
       margin-left: 2px;
     }
-    @keyframes fork-blink { 50% { opacity: 0; } }
+
+    @keyframes fork-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
     /* Empty state */
     .empty-state {
       margin: auto;
@@ -186,10 +268,19 @@
       color: var(--muted);
       opacity: 0.6;
     }
-    .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
-    .empty-state p { font-size: 13px; line-height: 1.6; }
+
+    .empty-state svg {
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      line-height: 1.6;
+    }
   </style>
 </head>
+
 <body>
   <div id="titlebar">
     <h1>Agent Manager</h1>
@@ -205,28 +296,25 @@
   </div>
   <div id="messages">
     <div class="empty-state">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.5"
-           stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="10" rx="2"/>
-        <circle cx="12" cy="5" r="2"/>
-        <path d="M12 7v4"/>
-        <line x1="8" y1="16" x2="8" y2="16"/>
-        <line x1="16" y1="16" x2="16" y2="16"/>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2" />
+        <circle cx="12" cy="5" r="2" />
+        <path d="M12 7v4" />
+        <line x1="8" y1="16" x2="8" y2="16" />
+        <line x1="16" y1="16" x2="16" y2="16" />
       </svg>
       <p>Ask anything, <code>@</code> to mention, <code>/</code> for workflows</p>
     </div>
   </div>
   <div id="input-area">
     <div id="input-wrapper">
-      <textarea id="chat-input" rows="1"
-        placeholder="Ask anything, @ to mention, / for workflows"></textarea>
+      <textarea id="chat-input" rows="1" placeholder="Ask anything, @ to mention, / for workflows"></textarea>
       <button id="send-btn" disabled aria-label="Send">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
         </svg>
       </button>
     </div>
@@ -236,10 +324,10 @@
     // AGENT_BACKEND is injected by the Electron preload or falls back to localhost
     const BACKEND_URL = (window.__AGENT_BACKEND__ ?? 'http://localhost:3001');
     const messagesEl = document.getElementById('messages');
-    const inputEl    = document.getElementById('chat-input');
-    const sendBtn    = document.getElementById('send-btn');
-    const clearBtn   = document.getElementById('clear-btn');
-    const modelSel   = document.getElementById('model-selector');
+    const inputEl = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const modelSel = document.getElementById('model-selector');
     let history = [];
     let emptyState = messagesEl.querySelector('.empty-state');
 
@@ -333,7 +421,7 @@
               bubble.textContent = assistantText;
               bubble.appendChild(cursor);
               messagesEl.scrollTop = messagesEl.scrollHeight;
-            } catch {}
+            } catch { }
           }
         }
 
@@ -347,4 +435,5 @@
     }
   </script>
 </body>
+
 </html>
