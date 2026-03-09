@@ -1,0 +1,264 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.monaco-workbench .part.activitybar {
+	width: var(--activity-bar-width, 48px);
+	height: 100%;
+}
+
+/* Activity Bar - shadow when sidebar is hidden or on the right */
+.monaco-workbench.nosidebar .part.activitybar {
+	box-shadow: var(--vscode-shadow-md);
+}
+
+.monaco-workbench.activitybar-right .part.activitybar {
+	box-shadow: var(--vscode-shadow-md);
+}
+
+.monaco-workbench .activitybar.bordered::before {
+	content: '';
+	float: left;
+	position: absolute;
+	box-sizing: border-box;
+	height: 100%;
+	width: 0px;
+	border-color: inherit;
+}
+
+.monaco-workbench .activitybar.left.bordered::before {
+	right: 0;
+	border-right-style: solid;
+	border-right-width: 1px;
+}
+
+.monaco-workbench .activitybar.right.bordered::before {
+	left: 0;
+	border-left-style: solid;
+	border-left-width: 1px;
+}
+
+.monaco-workbench .activitybar > .content {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+/** Viewlet Switcher */
+
+.monaco-workbench .activitybar > .content .monaco-action-bar {
+	text-align: left;
+	background-color: inherit;
+}
+
+.monaco-workbench .activitybar .action-item:focus {
+	outline: 0 !important;
+	/* activity bar indicates focus custom */
+}
+
+.monaco-workbench .activitybar > .content > .composite-bar {
+	margin-bottom: auto;
+}
+
+/** Menu Bar */
+
+.monaco-workbench .activitybar .menubar {
+	width: 100%;
+	height: 35px;
+}
+
+.monaco-workbench .activitybar .menubar.compact .toolbar-toggle-more {
+	width: 100%;
+	height: 35px;
+}
+
+/* ═══════════════════════════════════════════════
+   [FORK] Animated icons — replicates animate-ui
+   animateOnHover behaviour for Activity Bar icons
+   ═══════════════════════════════════════════════ */
+
+/* Base transition for all activity bar icons */
+.monaco-workbench .activitybar .action-item .codicon {
+	transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+		color 0.15s ease,
+		opacity 0.15s ease;
+	will-change: transform;
+}
+
+/* Search icon — scale + subtle rotate */
+.monaco-workbench .activitybar .action-item[title="Search"] .codicon {
+	transform-origin: center;
+}
+
+.monaco-workbench .activitybar .action-item[title="Search"]:hover .codicon {
+	transform: scale(1.18) rotate(-12deg);
+	color: #007acc;
+}
+
+/* Source Control — branch wiggle */
+.monaco-workbench .activitybar .action-item[title="Source Control"]:hover .codicon {
+	animation: fork-branch-wiggle 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+	color: #007acc;
+}
+
+@keyframes fork-branch-wiggle {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	20% {
+		transform: rotate(-10deg);
+	}
+
+	40% {
+		transform: rotate(8deg);
+	}
+
+	60% {
+		transform: rotate(-6deg);
+	}
+
+	80% {
+		transform: rotate(4deg);
+	}
+
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+/* Agent Manager (Bot) — pulse + scale */
+.monaco-workbench .activitybar .action-item[title="Agent Manager"]:hover .codicon {
+	animation: fork-bot-pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+	color: #007acc;
+}
+
+@keyframes fork-bot-pulse {
+	0% {
+		transform: scale(1);
+	}
+
+	40% {
+		transform: scale(1.25) rotate(-8deg);
+	}
+
+	70% {
+		transform: scale(1.15) rotate(4deg);
+	}
+
+	100% {
+		transform: scale(1.18) rotate(0deg);
+	}
+}
+
+/* Settings gear — slow spin on hover */
+.monaco-workbench .activitybar .action-item[title="Settings"]:hover .codicon,
+.monaco-workbench .activitybar .action-item[title="Manage"]:hover .codicon {
+	transform: rotate(90deg) scale(1.1);
+	color: #cccccc;
+}
+
+/* Extensions — bounce on hover */
+.monaco-workbench .activitybar .action-item[title="Extensions"]:hover .codicon {
+	animation: fork-extensions-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+	color: #007acc;
+}
+
+@keyframes fork-extensions-bounce {
+	0% {
+		transform: translateY(0);
+	}
+
+	40% {
+		transform: translateY(-4px) scale(1.1);
+	}
+
+	70% {
+		transform: translateY(1px) scale(1.05);
+	}
+
+	100% {
+		transform: translateY(0) scale(1.08);
+	}
+}
+
+/* Explorer icon — gentle scale */
+.monaco-workbench .activitybar .action-item[title="Explorer"]:hover .codicon {
+	transform: scale(1.15);
+	color: #007acc;
+}
+
+/* Active state: bright accent foreground */
+.monaco-workbench .activitybar .action-item.checked .codicon {
+	color: #007acc !important;
+}
+
+/* Active indicator — 2px left accent stripe */
+.monaco-workbench .activitybar .action-item.checked {
+	position: relative;
+}
+
+.monaco-workbench .activitybar .action-item.checked::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 20%;
+	height: 60%;
+	width: 2px;
+	background-color: #007acc;
+	/* [FORK] --wb-accent active stripe */
+	border-radius: 0 2px 2px 0;
+	transition: height 0.2s ease;
+}
+
+/* ─── Tab animations ─── */
+/* [FORK] Smooth tab background transitions */
+.monaco-workbench .tabs-container > .tab {
+	transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.monaco-workbench .tabs-container > .tab .tab-close {
+	transition: opacity 0.12s ease, transform 0.12s ease;
+	opacity: 0;
+}
+
+.monaco-workbench .tabs-container > .tab:hover .tab-close {
+	opacity: 1;
+}
+
+.monaco-workbench .tabs-container > .tab .tab-close:hover {
+	transform: scale(1.15);
+	color: #f44747;
+}
+
+/* ─── Sidebar tree item hover ─── */
+/* [FORK] Smooth list item highlights */
+.monaco-workbench .monaco-list .monaco-list-row {
+	transition: background-color 0.1s ease;
+}
+
+/* ─── Title bar layout toggle buttons ─── */
+/* [FORK] PanelLeft / PanelBottom / PanelRight toggle buttons */
+.monaco-workbench .part.titlebar .window-controls-container button {
+	transition: background 0.12s ease, color 0.12s ease, transform 0.15s ease;
+}
+
+.monaco-workbench .part.titlebar .window-controls-container button:hover {
+	transform: scale(1.08);
+}
+
+.monaco-workbench .part.titlebar .window-controls-container button.active {
+	background: rgba(255, 255, 255, 0.10);
+	color: #e5e5e5;
+}
+
+.monaco-workbench .part.titlebar .window-controls-container button:not(.active) {
+	color: #858585;
+}
+
+.monaco-workbench .part.titlebar .window-controls-container button:not(.active):hover {
+	color: #cccccc;
+	background: rgba(255, 255, 255, 0.05);
+}
