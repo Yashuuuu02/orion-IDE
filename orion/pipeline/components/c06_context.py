@@ -180,5 +180,19 @@ class ContextCurator(BaseComponent):
             ))
         return stripped
 
+    def _check_conflict(self, instruction: str, clause) -> ConflictSeverity | None:
+        """Check a single instruction against a single clause for conflicts.
+        Returns ConflictSeverity.HARD, ConflictSeverity.SOFT, or None."""
+        instruction_lower = instruction.lower()
+        assertion_lower = clause.assertion.lower()
+
+        # Pass 1 — keyword antonyms (HARD)
+        for pos, neg in ANTONYM_PAIRS:
+            if (pos in instruction_lower and neg in assertion_lower) or \
+               (neg in instruction_lower and pos in assertion_lower):
+                return ConflictSeverity.HARD
+
+        return None
+
 
 c06_context = ContextCurator()
