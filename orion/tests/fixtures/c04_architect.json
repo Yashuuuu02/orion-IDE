@@ -1,0 +1,12 @@
+{
+	"project_name": "Mock Test",
+	"components": [
+		{
+			"name": "Backend Router",
+			"purpose": "Handle fake LLM routing",
+			"files": [
+				"orion/llm/manager.py"
+			]
+		}
+	]
+}
