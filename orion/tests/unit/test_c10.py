@@ -18,7 +18,7 @@ async def test_c10_creates_checkpoint():
     result = await comp.execute(ctx)
 
     assert result.checkpoint_id is not None
-    print(f"ok: checkpoint created with id {result.checkpoint_id}")
+
 
 
 @pytest.mark.asyncio
@@ -28,4 +28,4 @@ async def test_c10_skips_fast_mode():
     comp = CheckpointManager()
     result = await comp.execute(ctx)
     assert result.checkpoint_id is None
-    print("ok: checkpoint skipped in fast mode")
+

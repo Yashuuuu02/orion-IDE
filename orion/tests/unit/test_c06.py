@@ -56,14 +56,14 @@ async def test_c06_hard_conflict_detection(planning_ctx_with_iisg):
     assert len(conflicts) >= 1, f"Expected at least 1 conflict, got {len(conflicts)}"
     hard = [c for c in conflicts if c.severity == ConflictSeverity.HARD]
     assert len(hard) >= 1, "Expected at least 1 HARD conflict"
-    print("ok: HARD conflict detected via antonym pairs")
+
 
     # Test stripping
     stripped = comp._strip_conflicts(matched_skills, hard)
     for s in stripped:
         for instr in s.instructions:
             assert "console.log" not in instr.lower() or True  # stripped instruction removed
-    print("ok: HARD conflict strips instruction")
+
 
 
 @pytest.mark.asyncio
@@ -107,7 +107,7 @@ async def test_c06_soft_conflict_warns():
 
     soft = [c for c in conflicts if c.severity == ConflictSeverity.SOFT]
     assert len(soft) >= 1, f"Expected SOFT conflict, got {len(soft)} soft conflicts"
-    print("ok: SOFT conflict detected via embedding similarity")
+
 
 
 @pytest.mark.asyncio
@@ -132,4 +132,4 @@ async def test_c06_fast_mode_no_iisg():
     # IISG is None in Fast Mode, so no conflict detection should run
     assert result.skill_conflicts == []
     assert result.iisg is None
-    print("ok: no conflict detection runs in Fast Mode")
+

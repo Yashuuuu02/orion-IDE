@@ -27,7 +27,7 @@ async def test_c08_merges_outputs():
     result = await comp.execute(ctx)
 
     assert result.merged is not None
-    print("ok: C08 merges agent outputs")
+
 
 
 @pytest.mark.asyncio
@@ -46,4 +46,4 @@ async def test_c08_handles_all_failed():
     result = await comp.execute(ctx)
 
     assert result.error == "All agents failed — nothing to integrate"
-    print("ok: C08 handles all-failed case")
+

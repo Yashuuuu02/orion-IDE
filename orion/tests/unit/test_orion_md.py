@@ -20,7 +20,7 @@ Use spaces."""
     assert "Use tabs." not in merged
     # Global-only "Naming" should be kept
     assert "snake_case" in merged
-    print("ok: project heading wins over global")
+
 
 
 def test_non_conflicting_sections_kept():
@@ -35,7 +35,7 @@ Write unit tests."""
 
     assert "Always log errors." in merged
     assert "Write unit tests." in merged
-    print("ok: non-conflicting sections from both kept")
+
 
 
 def test_preamble_handling():
@@ -55,7 +55,7 @@ Content B"""
     assert "Project preamble." in merged
     assert "Content A" in merged
     assert "Content B" in merged
-    print("ok: preamble + sections handled")
+
 
 
 def test_parse_sections():
@@ -74,4 +74,4 @@ Content 2."""
     assert "First" in sections
     assert "Content 1." in sections["First"]
     assert "Second" in sections
-    print("ok: _parse_sections works")
+

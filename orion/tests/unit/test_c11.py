@@ -38,7 +38,7 @@ async def test_c11_write_creates_file():
         assert target.exists(), f"FAIL: file not created at {target}"
         assert target.read_text(encoding="utf-8") == "print('hello')"
         assert result.execution["files_written"] == 1
-        print("ok: C11 write creates actual file")
+
 
 
 @pytest.mark.asyncio
@@ -66,7 +66,7 @@ async def test_c11_fast_mode_snapshot():
 
         cache_key = f"fast_snapshot:{ctx.run_id}"
         assert cache_key in mock_redis.data, f"FAIL: Redis key {cache_key} not found"
-        print("ok: C11 fast mode snapshot stored in Redis")
+
 
 
 @pytest.mark.asyncio
@@ -88,4 +88,4 @@ async def test_c11_delete_file():
         result = await comp.execute(ctx)
 
         assert not target.exists(), "FAIL: file not deleted"
-        print("ok: C11 delete removes file")
+

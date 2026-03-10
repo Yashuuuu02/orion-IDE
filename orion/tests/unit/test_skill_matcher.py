@@ -35,7 +35,7 @@ async def test_score_below_threshold_no_match():
         result = await matcher.match("test prompt", [skill], ctx)
 
     assert len(result) == 0, f"Expected no matches for low score, got {len(result)}"
-    print("ok: score below threshold does not fire")
+
 
 
 @pytest.mark.asyncio
@@ -59,7 +59,7 @@ async def test_score_above_threshold_fires():
 
     assert len(result) == 1
     assert result[0].score > 0.82
-    print("ok: score above threshold fires")
+
 
 
 @pytest.mark.asyncio
@@ -82,4 +82,4 @@ async def test_top_2_cap_enforced():
         result = await matcher.match("test prompt", skills, ctx)
 
     assert len(result) <= 2, f"Expected max 2, got {len(result)}"
-    print("ok: top-2 cap enforced")
+

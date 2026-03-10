@@ -26,7 +26,7 @@ async def test_c12_does_not_block():
 
     # The execute call should return almost instantly since background task is fire-and-forget
     assert elapsed < 1.0, f"FAIL: C12 blocked for {elapsed:.2f}s"
-    print(f"ok: C12 returned in {elapsed*1000:.0f}ms — does not block pipeline")
+
 
     # Give background task a chance to run
     await asyncio.sleep(0.1)
@@ -43,5 +43,5 @@ async def test_c12_handles_empty_outputs():
 
     # Should not crash
     assert result is not None
-    print("ok: C12 handles empty outputs gracefully")
+
     await asyncio.sleep(0.1)

@@ -6,7 +6,6 @@ from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
 from orion.schemas.iisg import IISGContract
 from orion.llm.manager import llm_manager
-# from orion.pipeline.runner import pipeline_runner # Wait, cyclic if we put it here and mock it. Let's import it locally or mock it.
 
 logger = logging.getLogger(__name__)
 

@@ -61,7 +61,7 @@ async def test_c07_parallel_all_agents_run():
     succeeded = [o for o in result.agent_outputs if o.success]
     assert len(failed) == 1, f"Expected exactly 1 failure, got {len(failed)}"
     assert len(succeeded) == 5, f"Expected 5 successes, got {len(succeeded)}"
-    print("ok: all 6 agents run, one failure does not cancel others")
+
 
 
 @pytest.mark.asyncio
@@ -97,4 +97,4 @@ async def test_c07_fast_mode_single_agent():
     assert len(result.agent_outputs) == 1
     assert result.agent_outputs[0].success is True
     assert result.agent_outputs[0].tokens_used == 500
-    print("ok: single agent runs in fast mode, result stored correctly")
+

@@ -29,3 +29,7 @@ test-output.json
 test/componentFixtures/.screenshots/*
 !test/componentFixtures/.screenshots/baseline/
 dist
+.env
+__pycache__/
+*.pyc
+.pytest_cache/

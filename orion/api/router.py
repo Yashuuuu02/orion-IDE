@@ -19,6 +19,3 @@ api_v1_router.include_router(pipeline_router)
 api_v1_router.include_router(settings_router)
 api_v1_router.include_router(memory_router)
 api_v1_router.include_router(search_router)
-
-# Note: The problem description asks to import and mount: health, pipeline, settings, memory routers
-# "All API routes under /api/v1/ prefix except health"

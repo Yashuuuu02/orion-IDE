@@ -40,7 +40,7 @@ async def test_c15_restores_files():
         restored_content = target.read_text(encoding="utf-8")
         assert restored_content == "original clean content", \
             f"FAIL: expected original content, got: {restored_content}"
-        print("ok: C15 restores files from checkpoint")
+
 
 
 @pytest.mark.asyncio
@@ -54,7 +54,7 @@ async def test_c15_skips_when_no_error():
 
     # No error means no rollback
     assert result.execution is None or (isinstance(result.execution, dict) and result.execution.get("status") != "rolled_back")
-    print("ok: C15 skips when no error")
+
 
 
 @pytest.mark.asyncio
@@ -66,4 +66,4 @@ async def test_c15_skips_fast_mode():
 
     comp = RollbackEngine()
     result = await comp.execute(ctx)
-    print("ok: C15 skips in fast mode")
+

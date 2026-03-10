@@ -21,7 +21,7 @@ async def test_c09_fast_mode_only_syntax_and_type():
     assert ValidationLayer.SECURITY not in layer_names
     assert ValidationLayer.FORMAL not in layer_names
     assert len(result.validation.layers) == 2
-    print("ok: fast mode runs only SYNTAX and TYPE layers")
+
 
 
 @pytest.mark.asyncio
@@ -39,7 +39,7 @@ async def test_c09_planning_mode_all_layers():
         ValidationLayer.SYNTAX, ValidationLayer.TYPE, ValidationLayer.SECURITY,
         ValidationLayer.PERFORMANCE, ValidationLayer.INTEGRATION, ValidationLayer.FORMAL,
     }
-    print("ok: planning mode runs all 6 layers")
+
 
 
 @pytest.mark.asyncio
@@ -65,4 +65,4 @@ async def test_c09_missing_tool_skipped():
     type_layer = [r for r in result.validation.layers if r.layer == ValidationLayer.TYPE][0]
     assert type_layer.passed is True
     assert any("tool not found" in issue for issue in type_layer.issues)
-    print("ok: missing tool produces skipped result, not failure")
+
