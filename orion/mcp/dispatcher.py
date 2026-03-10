@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 from pydantic import BaseModel
 from orion.core.config import settings
+from orion.core.resilience import mcp_circuit
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +85,11 @@ class MCPDispatcher:
             query = f"{query} [context: {context_file[:200]}]"
         api_key = self._api_keys["tavily"]
         async with httpx.AsyncClient() as client:
-            response = await client.post(
+            response = await mcp_circuit.call(client.post(
                 "https://api.tavily.com/search",
                 json={"query": query, "api_key": api_key, "max_results": 5},
                 timeout=10.0
-            )
+            ))
             data = response.json()
             return [
                 SearchResult(
@@ -108,12 +109,12 @@ class MCPDispatcher:
         import httpx
         api_key = self._api_keys["brave"]
         async with httpx.AsyncClient() as client:
-            response = await client.get(
+            response = await mcp_circuit.call(client.get(
                 "https://api.search.brave.com/res/v1/web/search",
                 params={"q": query},
                 headers={"X-Subscription-Token": api_key},
                 timeout=10.0
-            )
+            ))
             data = response.json()
             results = data.get("web", {}).get("results", [])
             return [

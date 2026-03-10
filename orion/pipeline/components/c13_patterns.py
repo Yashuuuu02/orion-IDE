@@ -30,14 +30,14 @@ class C13PatternRecognition:
 
     async def _store_patterns(self, ctx: PipelineContext):
         try:
-            from orion.core.database import get_async_session
+            from orion.core.database import async_session_maker
             from orion.models.pattern import PatternLibrary
 
             patterns = self._extract_patterns(ctx)
             if not patterns:
                 return
 
-            async with get_async_session() as session:
+            async with async_session_maker() as session:
                 for pattern in patterns:
                     entry = PatternLibrary(
                         run_id=ctx.run_id,
