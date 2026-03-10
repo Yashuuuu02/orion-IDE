@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import logging
 import sqlite3
@@ -87,16 +87,13 @@ class WebSocketSessionManager:
         if msg_type == "run_pipeline":
             # NO_PROVIDER_CONFIGURED gate
             mgr = getattr(self, "_llm_manager", llm_manager)
-            if not mgr.is_configured():
+            if not settings.MOCK_LLM and not mgr.is_configured():
                 err = {
                     "type": "error",
                     "code": "NO_PROVIDER_CONFIGURED",
                     "action": "open_settings"
                 }
-                if websocket and hasattr(websocket, "send_json"):
-                    await websocket.send_json(err)
-                else:
-                    await self.emit(session_id, err)
+                await self.emit(session_id, err)
                 return
 
             run_mode = self._resolve_mode(message)
