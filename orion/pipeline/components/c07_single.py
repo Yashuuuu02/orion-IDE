@@ -62,3 +62,6 @@ class FastModeSingleAgent(BaseComponent):
 
 
 c07_single = FastModeSingleAgent()
+
+# Alias for backward compatibility
+SingleAgentComponent = FastModeSingleAgent

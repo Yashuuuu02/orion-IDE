@@ -42,6 +42,10 @@ class ParallelRoles(BaseComponent):
             if ctx.run_config.is_agent_enabled(role):
                 enabled_agents.append((role, agent))
 
+        # If no agent_configs specified, default to all agents enabled
+        if not enabled_agents and not ctx.run_config.agent_configs:
+            enabled_agents = list(AGENT_MAP.items())
+
         if not enabled_agents:
             logger.warning("C07: No agents enabled in run_config")
             return ctx
