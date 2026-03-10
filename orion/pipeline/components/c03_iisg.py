@@ -10,7 +10,7 @@ from orion.llm.manager import llm_manager
 
 logger = logging.getLogger(__name__)
 
-class IISGGeneratorComponent(BaseComponent):
+class IISGGenerator(BaseComponent):
     component_id = "c03_iisg"
     component_name = "IISG Generator"
 
@@ -70,4 +70,4 @@ class IISGGeneratorComponent(BaseComponent):
         return ctx
 
 # Expose instance
-c03_iisg = IISGGeneratorComponent()
+c03_iisg = IISGGenerator()

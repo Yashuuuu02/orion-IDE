@@ -10,7 +10,7 @@ from orion.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-class PlannerComponent(BaseComponent):
+class Planner(BaseComponent):
     component_id = "c05_planner"
     component_name = "Planner"
 
@@ -68,7 +68,7 @@ class PlannerComponent(BaseComponent):
         await self._ws_emit(ctx, "cost.estimate")
 
         # COST GATE
-        if ctx.cost_estimate and ctx.cost_estimate > ctx.run_config.cost_cap_usd:
+        if ctx.cost_estimate and ctx.run_config.cost_cap_usd is not None and ctx.cost_estimate > ctx.run_config.cost_cap_usd:
             await self._ws_emit(ctx, "cost.approval_required")
 
             from orion.pipeline.runner import pipeline_runner
@@ -92,4 +92,4 @@ class PlannerComponent(BaseComponent):
         return ctx
 
 # Expose instance
-c05_planner = PlannerComponent()
+c05_planner = Planner()

@@ -9,7 +9,7 @@ from orion.llm.manager import llm_manager
 
 logger = logging.getLogger(__name__)
 
-class IntentInterpreterComponent(BaseComponent):
+class IntentInterpreter(BaseComponent):
     component_id = "c01_intent"
     component_name = "Intent Interpreter"
 
@@ -55,4 +55,4 @@ class IntentInterpreterComponent(BaseComponent):
         return ctx
 
 # Expose instance
-c01_intent = IntentInterpreterComponent()
+c01_intent = IntentInterpreter()

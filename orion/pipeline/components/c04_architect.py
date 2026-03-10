@@ -7,7 +7,7 @@ from orion.llm.manager import llm_manager
 
 logger = logging.getLogger(__name__)
 
-class ArchitectComponent(BaseComponent):
+class Architect(BaseComponent):
     component_id = "c04_architect"
     component_name = "Architect"
 
@@ -37,4 +37,4 @@ class ArchitectComponent(BaseComponent):
         return ctx
 
 # Expose instance
-c04_architect = ArchitectComponent()
+c04_architect = Architect()

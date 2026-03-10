@@ -11,7 +11,7 @@ import time
 
 logger = logging.getLogger(__name__)
 
-class StackResolverComponent(BaseComponent):
+class StackResolver(BaseComponent):
     component_id = "c02_stack"
     component_name = "Stack Resolver"
 
@@ -87,4 +87,4 @@ class StackResolverComponent(BaseComponent):
 
         return ctx
 
-c02_stack = StackResolverComponent()
+c02_stack = StackResolver()
