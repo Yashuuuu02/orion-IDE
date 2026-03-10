@@ -3,8 +3,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from orion.core.config import settings
 
 db_url = settings.DATABASE_URL
-if not db_url and settings.MOCK_LLM:
-    db_url = "sqlite+aiosqlite:///:memory:"
 
 engine = create_async_engine(db_url, echo=False)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
