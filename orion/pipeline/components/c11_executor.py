@@ -14,6 +14,10 @@ class AtomicExecutor(BaseComponent):
     component_id = "c11_executor"
     component_name = "Atomic Executor"
 
+    def __init__(self):
+        super().__init__()
+        self._redis = None  # Can be injected for testing
+
     async def _run(self, ctx: PipelineContext) -> PipelineContext:
         if ctx.cancelled:
             return ctx
@@ -66,7 +70,6 @@ class AtomicExecutor(BaseComponent):
         except Exception as e:
             logger.error(f"C11: File write failed: {e}")
             ctx.error = f"Atomic execution failed: {e}"
-            # In Planning Mode, trigger rollback
             if ctx.mode == RunMode.PLANNING and ctx.checkpoint_id:
                 ctx.error = f"Execution failed, rollback needed: {e}"
 
@@ -82,7 +85,6 @@ class AtomicExecutor(BaseComponent):
     def _get_file_changes(self, ctx: PipelineContext) -> list:
         if ctx.merged and isinstance(ctx.merged, dict):
             return ctx.merged.get("file_changes", [])
-        # Fast mode: use agent_outputs directly
         if ctx.agent_outputs:
             changes = []
             for output in ctx.agent_outputs:
@@ -90,6 +92,12 @@ class AtomicExecutor(BaseComponent):
                     changes.append(fc)
             return changes
         return []
+
+    def _get_redis(self):
+        """Use injected _redis if available, otherwise get_redis()."""
+        if self._redis is not None:
+            return self._redis
+        return get_redis()
 
     async def _create_fast_snapshot(self, ctx: PipelineContext, workspace_root: str):
         """Create git diff snapshot and store in Redis."""
@@ -103,9 +111,12 @@ class AtomicExecutor(BaseComponent):
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=10.0)
             diff_output = (stdout or b"").decode("utf-8", errors="replace")
 
-            redis = get_redis()
+            redis = self._get_redis()
             cache_key = f"fast_snapshot:{ctx.run_id}"
-            await redis.setex(cache_key, 7200, diff_output)  # TTL 2h
+            if hasattr(redis, 'set'):
+                await redis.set(cache_key, diff_output, ex=7200)
+            else:
+                await redis.setex(cache_key, 7200, diff_output)
             logger.info(f"C11: Fast snapshot stored in Redis: {cache_key}")
         except Exception as e:
             logger.warning(f"C11: Failed to create fast snapshot: {e}")

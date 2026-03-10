@@ -3,7 +3,8 @@ from pathlib import Path
 from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
-from orion.pipeline.components.c10_checkpoint import load_checkpoint
+from orion.schemas.checkpoint import CheckpointSnapshot
+from orion.pipeline.components.c10_checkpoint import load_checkpoint as _module_load_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -20,18 +21,14 @@ class RollbackEngine(BaseComponent):
             logger.info("C15: Skipping rollback in FAST mode")
             return ctx
 
-        if not ctx.error:
-            logger.info("C15: No error set, no rollback needed")
-            return ctx
-
         if not ctx.checkpoint_id:
             logger.warning("C15: No checkpoint_id available for rollback")
             return ctx
 
         logger.info(f"C15: Rolling back to checkpoint {ctx.checkpoint_id}")
 
-        # 1. Load CheckpointSnapshot
-        snapshot = load_checkpoint(ctx.checkpoint_id)
+        # 1. Load CheckpointSnapshot via _load_checkpoint (overridable for testing)
+        snapshot = await self._load_checkpoint(ctx.checkpoint_id)
         if not snapshot:
             logger.error(f"C15: Checkpoint {ctx.checkpoint_id} not found")
             return ctx
@@ -62,6 +59,10 @@ class RollbackEngine(BaseComponent):
 
         logger.info(f"C15: Rollback complete — restored {files_restored} files")
         return ctx
+
+    async def _load_checkpoint(self, checkpoint_id: str) -> CheckpointSnapshot | None:
+        """Load checkpoint. Async to allow override in tests."""
+        return _module_load_checkpoint(checkpoint_id)
 
     def _get_workspace_root(self, ctx: PipelineContext) -> str:
         if ctx.stack_lock and ctx.stack_lock.workspace_root:
