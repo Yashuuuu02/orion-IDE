@@ -73,23 +73,33 @@ class WebSocketSessionManager:
             self._approval_events[run_id].set()
             logger.info(f"Approval resolved for run_id {run_id}")
 
-    async def handle_message(self, session_id: str, message: dict):
+    def _resolve_mode(self, message: dict) -> RunMode:
+        if message.get("source") == "chat_tab":
+            return RunMode.FAST
+        try:
+            return RunMode(message.get("mode", "planning"))
+        except ValueError:
+            return RunMode.PLANNING
+
+    async def handle_message(self, session_id: str, message: dict, websocket=None):
         msg_type = message.get("type")
 
         if msg_type == "run_pipeline":
             # NO_PROVIDER_CONFIGURED gate
-            if not llm_manager.is_configured() and not settings.MOCK_LLM:
-                await self.emit(session_id, {
+            mgr = getattr(self, "_llm_manager", llm_manager)
+            if not mgr.is_configured():
+                err = {
                     "type": "error",
                     "code": "NO_PROVIDER_CONFIGURED",
                     "action": "open_settings"
-                })
+                }
+                if websocket and hasattr(websocket, "send_json"):
+                    await websocket.send_json(err)
+                else:
+                    await self.emit(session_id, err)
                 return
 
-            run_mode = message.get("mode", RunMode.PLANNING)
-            # CHAT TAB FAST MODE OVERRIDE
-            if message.get("source") == "chat_tab":
-                run_mode = RunMode.FAST
+            run_mode = self._resolve_mode(message)
 
             # Pipeline starting logic would go here
             logger.info(f"Pipeline started for {session_id} in mode {run_mode}")
