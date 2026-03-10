@@ -1,0 +1,89 @@
+name: Orion Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: orion
+          POSTGRES_DB: orion_test
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Run Alembic migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:orion@localhost/orion_test
+          REDIS_URL: redis://localhost:6379
+          ORION_ENV: ci
+          MOCK_LLM: "true"
+        run: poetry run alembic upgrade head
+
+      - name: Run unit tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:orion@localhost/orion_test
+          REDIS_URL: redis://localhost:6379
+          ORION_ENV: ci
+          MOCK_LLM: "true"
+        run: poetry run python -m pytest orion/tests/unit/ -v --tb=short --cov=orion --cov-report=xml
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:orion@localhost/orion_test
+          REDIS_URL: redis://localhost:6379
+          ORION_ENV: ci
+          MOCK_LLM: "true"
+        run: poetry run python -m pytest orion/tests/integration/ -v --tb=short
+
+      - name: Run determinism test
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:orion@localhost/orion_test
+          REDIS_URL: redis://localhost:6379
+          ORION_ENV: ci
+          MOCK_LLM: "true"
+        run: poetry run python -m pytest orion/tests/integration/test_pipeline_planning.py::test_determinism -v
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+        continue-on-error: true
