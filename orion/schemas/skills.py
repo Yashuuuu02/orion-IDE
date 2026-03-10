@@ -1,5 +1,15 @@
 from enum import Enum
+from typing import Optional
 from pydantic import BaseModel
+
+class SkillRecord(BaseModel):
+    skill_id: str
+    name: str
+    description: str
+    instructions: list[str]
+    source: str  # "global" or "project"
+    enabled: bool = True
+    path: str = ""
 
 class ConflictSeverity(str, Enum):
     HARD = "hard"
