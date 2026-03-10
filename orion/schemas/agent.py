@@ -3,12 +3,12 @@ from typing import Optional
 from pydantic import BaseModel
 
 class AgentRole(str, Enum):
-    BACKEND = "BACKEND"
-    FRONTEND = "FRONTEND"
-    DATABASE = "DATABASE"
-    DEVOPS = "DEVOPS"
-    TESTING = "TESTING"
-    DOCS = "DOCS"
+    BACKEND = "backend"
+    FRONTEND = "frontend"
+    DATABASE = "database"
+    DEVOPS = "devops"
+    TESTING = "testing"
+    DOCS = "docs"
 
 class AgentStatus(str, Enum):
     PENDING = "PENDING"
