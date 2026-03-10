@@ -1,28 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from orion.core.lifespan import lifespan
+from orion.api.health import router as health_router
+from orion.api.router import api_v1_router
+from orion.api.ws import ws_manager
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+app.include_router(health_router)
+app.include_router(api_v1_router)
 
 @app.websocket("/ws/{session_id}")
-async def websocket_endpoint(session_id: str):
-    pass
-
-@app.post("/api/v1/pipeline")
-async def pipeline():
-    return {}
-
-@app.get("/api/v1/settings")
-async def get_settings():
-    return {}
-
-@app.get("/api/v1/memory")
-async def get_memory():
-    return {}
-
-@app.get("/api/v1/skills")
-async def get_skills():
-    return {}
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    await ws_manager.connect(session_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_json()
+            await ws_manager.handle_message(session_id, data, websocket)
+    except WebSocketDisconnect:
+        ws_manager.disconnect(session_id)

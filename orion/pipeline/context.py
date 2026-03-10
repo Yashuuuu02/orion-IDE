@@ -56,6 +56,7 @@ class PipelineContext(BaseModel):
     # Control flow
     cancelled: bool = False
     error: Optional[str] = None
+    recovery_strategy: Optional[str] = None
     active_provider: Optional[str] = None
 
     # Permissions

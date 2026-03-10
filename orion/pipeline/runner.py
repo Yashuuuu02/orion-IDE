@@ -17,6 +17,8 @@ from orion.pipeline.components.c09_validation import c09_validation
 from orion.pipeline.components.c10_checkpoint import c10_checkpoint
 from orion.pipeline.components.c11_executor import c11_executor
 from orion.pipeline.components.c12_memory import c12_memory
+from orion.pipeline.components.c13_patterns import c13_patterns
+from orion.pipeline.components.c14_failure import c14_failure
 from orion.pipeline.components.c15_rollback import c15_rollback
 
 logger = logging.getLogger(__name__)
@@ -27,8 +29,9 @@ class PipelineRunner:
     PLANNING_MODE_COMPONENTS = [
         c01_intent, c02_stack, c03_iisg, c04_architect, c05_planner,
         c06_context, c07_roles, c08_integrator, c09_validation,
-        c10_checkpoint, c11_executor, c12_memory, c15_rollback
-    ]  # 13 components (C13/C14 added in next prompt)
+        c10_checkpoint, c11_executor, c12_memory, c13_patterns,
+        c14_failure, c15_rollback
+    ]  # 15 components
 
     FAST_MODE_COMPONENTS = [
         c01_intent, c02_stack, c06_context, c07_single,
@@ -94,6 +97,16 @@ class PipelineRunner:
                 if component is c12_memory:
                     asyncio.create_task(component.execute(ctx))
                     continue
+
+                # C13 runs as background task after C12
+                if component is c13_patterns:
+                    asyncio.create_task(component.execute(ctx))
+                    continue
+
+                # C14 only runs if ctx.error is set
+                if component is c14_failure:
+                    if not ctx.error:
+                        continue
 
                 # C15 only runs if there is an error
                 if component is c15_rollback:
