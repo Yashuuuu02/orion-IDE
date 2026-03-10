@@ -1,7 +1,9 @@
 import asyncio
 import os
+import time
 import logging
 from orion.pipeline.context import PipelineContext
+from orion.core.metrics import pipeline_execution_seconds
 from orion.schemas.pipeline import RunMode
 from orion.core.config import settings
 from orion.pipeline.components.c01_intent import c01_intent
@@ -89,6 +91,7 @@ class PipelineRunner:
         )
 
         try:
+            start = time.time()
             for component in components:
                 if ctx.cancelled or ctx.error:
                     break
@@ -127,6 +130,8 @@ class PipelineRunner:
                     "error": ctx.error
                 }
             )
+
+            pipeline_execution_seconds.observe(time.time() - start)
 
         except Exception as e:
             ctx.error = str(e)

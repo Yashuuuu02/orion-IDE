@@ -5,6 +5,7 @@ from orion.schemas.agent import AgentRole, AgentOutput
 from orion.pipeline.context import PipelineContext
 from orion.core.config import SEED_SUPPORTED_PROVIDERS
 from orion.llm.manager import llm_manager
+from orion.core.metrics import agent_token_usage_total
 
 class BaseAgent(ABC):
     role: AgentRole
@@ -36,6 +37,12 @@ class BaseAgent(ABC):
             if "iisg_satisfied" not in parsed: parsed["iisg_satisfied"] = []
             if "tokens_used" not in parsed: parsed["tokens_used"] = 150
             if "duration_ms" not in parsed: parsed["duration_ms"] = duration_ms
+
+            provider = ctx.active_provider or "unknown"
+            agent_token_usage_total.labels(
+                agent_role=self.role.value,
+                provider=provider
+            ).inc(parsed["tokens_used"])
 
             return AgentOutput(**parsed)
 

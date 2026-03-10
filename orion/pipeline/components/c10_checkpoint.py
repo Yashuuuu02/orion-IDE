@@ -6,6 +6,7 @@ from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
 from orion.schemas.checkpoint import CheckpointSnapshot
+from orion.core.metrics import checkpoint_size_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,8 @@ class CheckpointManager(BaseComponent):
 
         # 4. Save to PostgreSQL (mock-safe: store on ctx for now)
         ctx.checkpoint_id = checkpoint_id
+        checkpoint_size_bytes.set(len(json.dumps(files_snapshot)))
+
         # Store snapshot in a retrievable location for C15
         if not hasattr(ctx, '_checkpoint_snapshots'):
             ctx._checkpoint_snapshots = {}

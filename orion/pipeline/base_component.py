@@ -2,6 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from orion.pipeline.context import PipelineContext
 from orion.api.ws import ws_manager
+from orion.core.metrics import component_execution_seconds
 
 class BaseComponent(ABC):
     component_id: str
@@ -18,6 +19,8 @@ class BaseComponent(ABC):
         duration_ms = int((time.time() - start_time) * 1000)
 
         await self._ws_emit(result_ctx, "component.completed", {"duration_ms": duration_ms})
+
+        component_execution_seconds.labels(component_id=self.component_id).observe(duration_ms / 1000)
 
         return result_ctx
 

@@ -6,6 +6,7 @@ from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
 from orion.schemas.validation import ValidationLayer, LayerResult, ValidationResult
+from orion.core.metrics import validation_failures_total
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,10 @@ class ValidationGate(BaseComponent):
             layers=layer_results,
             total_duration_ms=total_ms,
         )
+
+        for layer in layer_results:
+            if not layer.passed:
+                validation_failures_total.labels(layer=layer.layer.value).inc()
 
         if not overall_passed:
             # Check IISG formal failures specifically

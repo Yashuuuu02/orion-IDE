@@ -7,6 +7,7 @@ from orion.schemas.settings import ProviderConfig
 from orion.llm.mock import MockLLM
 from orion.llm.config import config_builder
 from orion.core.resilience import llm_circuit
+from orion.core.metrics import llm_api_errors_total
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +83,16 @@ class LiteLLMManager:
             "temperature": temperature
         })
 
-        response = await llm_circuit.call(self._router.acompletion(**params))
-        return response.choices[0].message.content
+        try:
+            response = await llm_circuit.call(self._router.acompletion(**params))
+            return response.choices[0].message.content
+        except Exception as e:
+            err_provider = model.split("/")[0] if "/" in model else "unknown"
+            llm_api_errors_total.labels(
+                provider=err_provider,
+                error_type=type(e).__name__
+            ).inc()
+            raise
 
     async def get_embedding(self, text: str) -> list[float]:
         if settings.MOCK_LLM:
