@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from orion.core.redis_client import get_redis
 from orion.llm.manager import llm_manager
+from orion.core.config import settings
 
 router = APIRouter()
 
@@ -10,14 +11,14 @@ async def health():
 
 @router.get("/health/detailed")
 async def health_detailed():
-    status = {"status": "ok", "database": False, "redis": False, "llm_configured": False}
+    status = {"status": "ok", "db": False, "redis": False, "llm_configured": False, "mock_llm": settings.MOCK_LLM}
 
     # Check DB (using settings/sqlite logic if applicable, defaulting to True if no exception)
     try:
         # Simplified since no specific DB logic requested other than try/except
-        status["database"] = True
+        status["db"] = True
     except Exception:
-        status["database"] = False
+        status["db"] = False
 
     # Check Redis
     try:

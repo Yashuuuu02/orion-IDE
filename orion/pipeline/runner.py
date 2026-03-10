@@ -143,5 +143,34 @@ class PipelineRunner:
 
         return ctx
 
+    async def _restore_pending_approvals(self):
+        """
+        Called at FastAPI startup via lifespan.
+        Scans Redis for any iisg_approval:* keys left from before a restart.
+        For each found: re-emits the iisg.preview event to the session
+        so the user sees the approval dialog again after reconnecting.
+        """
+        try:
+            from orion.core.redis_client import get_redis
+            from orion.api.ws import ws_manager
+            import json
+            redis = get_redis()
+            keys = await redis.keys("iisg_approval:*")
+            for key in keys:
+                data = await redis.get(key)
+                if data:
+                    approval_data = json.loads(data)
+                    run_id = key.decode().replace("iisg_approval:", "")
+                    session_id = approval_data.get("session_id")
+                    if session_id:
+                        await ws_manager.emit(session_id, {
+                            "type": "iisg.preview",
+                            "run_id": run_id,
+                            "restored": True,
+                            "approval_type": approval_data.get("type", "iisg")
+                        })
+                        logger.info(f"Restored pending approval for run_id {run_id}")
+        except Exception as e:
+            logger.warning(f"_restore_pending_approvals failed (non-fatal): {e}")
 
 pipeline_runner = PipelineRunner()

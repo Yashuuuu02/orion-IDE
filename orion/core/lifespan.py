@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from orion.core.database import create_all_tables, engine
 from orion.core.redis_client import init_redis, close_redis
+from orion.pipeline.runner import pipeline_runner
 import logging
 from alembic import command
 from alembic.config import Config
@@ -23,6 +24,7 @@ async def lifespan(app: FastAPI):
     try:
         await create_all_tables()
         await init_redis()
+        await pipeline_runner._restore_pending_approvals()
 
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, run_upgrade)

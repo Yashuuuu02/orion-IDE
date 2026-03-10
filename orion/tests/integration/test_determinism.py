@@ -42,10 +42,10 @@ async def test_determinism_planning_mode():
                 contract_hashes.append(ctx.iisg.contract_hash)
 
     # Core assertions
-    assert len(set(run_ids)) == 1, f"DETERMINISM BROKEN: got {len(set(run_ids))} different run_ids"
+    assert len(set(run_ids)) == 1, f"DETERMINISM BROKEN: got {len(set(run_ids))} different run_ids across 10 runs"
     assert len(set(run_id_ints)) == 1
     if contract_hashes:
-        assert len(set(contract_hashes)) == 1
+        assert len(set(contract_hashes)) == 1, "DETERMINISM BROKEN: contract_hash changed across runs"
 
 @pytest.mark.asyncio
 async def test_different_prompts_produce_different_run_ids():

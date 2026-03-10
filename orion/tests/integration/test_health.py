@@ -17,6 +17,6 @@ async def test_health_detailed():
 
     data = response.json()
     assert data["status"] == "ok"
-    assert "database" in data
+    assert "db" in data
     assert "redis" in data
     assert "llm_configured" in data
