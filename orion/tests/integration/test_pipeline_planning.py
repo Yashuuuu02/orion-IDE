@@ -1,62 +1,87 @@
 import pytest
-import os
 import asyncio
-from unittest.mock import AsyncMock, patch
+import os
+from unittest.mock import patch, MagicMock, AsyncMock
+
+# IMPORTANT: Mock Redis before importing components
+import orion.core.redis_client
+class MockRedis:
+    def __init__(self): self.data = {}
+    async def get(self, k): return self.data.get(k)
+    async def setex(self, k, t, v): self.data[k] = v
+    async def set(self, k, v, ex=None): self.data[k] = v
+    async def rpush(self, k, v): pass
+    async def lrange(self, k, s, e): return []
+    async def ltrim(self, k, s, e): pass
+    async def expire(self, k, t): pass
+    async def delete(self, k): self.data.pop(k, None)
+    async def keys(self, pattern): return [k for k in self.data.keys() if k.startswith(pattern.replace('*', ''))]
+
+orion.core.redis_client.get_redis = lambda: MockRedis()
+
 from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
+from orion.schemas.settings import RunConfig, AgentRunConfig
+from orion.schemas.agent import AgentRole
+from orion.pipeline.runner import PipelineRunner
 from orion.pipeline.runner import pipeline_runner
 
-@pytest.fixture
-def mock_redis():
-    class MockRedisObj:
-        async def lrange(self, *args, **kwargs): return []
-        async def rpush(self, *args, **kwargs): pass
-        async def ltrim(self, *args, **kwargs): pass
-        async def expire(self, *args, **kwargs): pass
-        async def set(self, *args, **kwargs): pass
-        async def setex(self, *args, **kwargs): pass
-        async def get(self, *args, **kwargs): return None
-        async def hset(self, *args, **kwargs): pass
-        async def hget(self, *args, **kwargs): return None
-        async def flushdb(self): pass
-    return MockRedisObj()
-
 @pytest.mark.asyncio
-async def test_full_planning_run(mock_redis):
+async def test_pipeline_planning_full_run():
+    # 1. Create PipelineContext with RunMode.PLANNING
     os.environ["MOCK_LLM"] = "true"
-
-    ctx = PipelineContext.create(
-        session_id="test_session",
-        workspace_id="test_workspace",
-        raw_prompt="create a hello world script",
-        mode=RunMode.PLANNING
+    run_config = RunConfig(
+        agent_configs=[AgentRunConfig(role=AgentRole.BACKEND, enabled=True, token_limit=50000)]
     )
+    ctx = PipelineContext.create("s1", "w1", "add login endpoint", RunMode.PLANNING, run_config=run_config)
+    ctx.active_provider = "openai"
 
-    events = []
-    async def capture_emit(session_id, event):
-        events.append(event)
+    # Mock ws_emit
+    emitted = []
+    async def mock_ws_emit(ctx, event, payload=None):
+        emitted.append(event)
 
-    # We auto-approve inside the loop if necessary, but runner's wait_for_approval
-    # might block if not patched. We'll patch event wait to immediately return approval.
-    with patch("orion.pipeline.runner.PipelineRunner._wait_for_approval", new_callable=AsyncMock) as mock_approve, \
-         patch("orion.core.redis_client.get_redis", return_value=mock_redis), \
-         patch("orion.api.ws.get_redis", return_value=mock_redis), \
-         patch("orion.pipeline.components.c01_intent.get_redis", return_value=mock_redis), \
-         patch("orion.pipeline.components.c02_stack.get_redis", return_value=mock_redis), \
-         patch("orion.pipeline.components.c12_memory.MemoryLogger.execute", new_callable=AsyncMock, return_value=ctx):
+    # We need to auto-resolve approvals (IISG from C03, Planner from C05)
+    async def mock_wait_for_approval(run_id, approval_type, timeout_seconds=300):
+        return {"approved": True, "decision": "approve"}
 
-        mock_approve.return_value = {"decision": "approve"}
+    original_wait = pipeline_runner._wait_for_approval
+    original_check = pipeline_runner._check_cost_gate
+    pipeline_runner._wait_for_approval = mock_wait_for_approval
+    pipeline_runner._check_cost_gate = AsyncMock()
 
-        result_ctx = await pipeline_runner.run(ctx, capture_emit)
+    try:
+        with patch("orion.pipeline.base_component.BaseComponent._ws_emit", new_callable=AsyncMock):
+            # 2. Run full pipeline via PipelineRunner
+            ctx = await pipeline_runner.run(ctx, mock_ws_emit)
+    finally:
+        pipeline_runner._wait_for_approval = original_wait
+        pipeline_runner._check_cost_gate = original_check
 
-    event_types = [e["type"] for e in events]
-    assert "pipeline.started" in event_types
-    assert "pipeline.completed" in event_types or "pipeline.failed" in event_types
+    # 3. Asserts ctx.intent is populated (C01 ran)
+    assert ctx.intent is not None, "FAIL: ctx.intent is None (C01 did not run)"
+    assert ctx.intent.intent_type is not None
 
-    # Assert C01/C02 basics populated in a normal mock run
-    # (Mock LLMs in components will populate these if MOCK_LLM=true)
-    assert result_ctx.intent is not None
-    assert result_ctx.stack_lock is not None
+    # 4. Asserts ctx.stack_lock is populated (C02 ran)
+    assert ctx.stack_lock is not None, "FAIL: ctx.stack_lock is None (C02 did not run)"
+    assert ctx.stack_lock.language is not None
+
+    # 5. Asserts ctx.iisg is populated (C03 ran)
+    assert ctx.iisg is not None, "FAIL: ctx.iisg is None (C03 did not run)"
+    assert len(ctx.iisg.clauses) > 0
+
+    # 6. Asserts ctx.validation is populated (C09 ran)
+    assert ctx.validation is not None, "FAIL: ctx.validation is None (C09 did not run)"
+    assert len(ctx.validation.layers) > 0
+
+    # 7. Asserts ctx.error is None
+    assert ctx.error is None, f"FAIL: Pipeline failed with error: {ctx.error}"
+
+    # 8. Asserts pipeline.completed WS event was emitted
+    assert "pipeline.started" in emitted, "FAIL: pipeline.started not emitted"
+    assert "pipeline.completed" in emitted, "FAIL: pipeline.completed not emitted"
+
+    print("ok: full pipeline run completed successfully")
 
 @pytest.mark.asyncio
 async def test_determinism():

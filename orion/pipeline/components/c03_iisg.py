@@ -43,13 +43,13 @@ class IISGGenerator(BaseComponent):
         # PAUSE
         await self._ws_emit(ctx, "iisg.preview", {"contract": ctx.iisg.model_dump()})
 
-        from orion.pipeline.runner import pipeline_runner
+        import orion.pipeline.runner as runner_module
 
         # Blocks until user approves
         try:
             # 5 minute timeout
             decision = await asyncio.wait_for(
-                pipeline_runner._wait_for_approval(ctx.run_id, "iisg"),
+                runner_module.pipeline_runner._wait_for_approval(ctx.run_id, "iisg"),
                 timeout=300.0
             )
             if not decision.get("approved"):

@@ -22,6 +22,8 @@ class Planner(BaseComponent):
             logger.info("C05: Skipping in FAST mode")
             return ctx
 
+        import orion.pipeline.runner as runner_module
+
         logger.info("C05: Generating task DAG")
 
         messages = [
@@ -71,9 +73,8 @@ class Planner(BaseComponent):
         if ctx.cost_estimate and ctx.run_config.cost_cap_usd is not None and ctx.cost_estimate > ctx.run_config.cost_cap_usd:
             await self._ws_emit(ctx, "cost.approval_required")
 
-            from orion.pipeline.runner import pipeline_runner
             try:
-                decision = await pipeline_runner._wait_for_approval(ctx.run_id, "cost")
+                decision = await runner_module.pipeline_runner._wait_for_approval(ctx.run_id, "cost")
                 if not decision.get("approved"):
                     ctx.cancelled = True
                     return ctx
@@ -81,12 +82,27 @@ class Planner(BaseComponent):
                 ctx.cancelled = True
                 return ctx
 
+        # In planning mode, we wait for user approval of the plan before proceeding
+        # (This implies the UI will show the DAG/Blueprint and let the user say "Go")
+        try:
+            decision = await asyncio.wait_for(
+                runner_module.pipeline_runner._wait_for_approval(ctx.run_id, "planner"),
+                timeout=300.0
+            )
+        except Exception as e:
+            logger.error(f"C05 planner approval error: {e}")
+            ctx.cancelled = True
+            return ctx
+
         # Simulate budget call validation against cost_tracking
         from orion.pipeline.runner import pipeline_runner
         try:
            await pipeline_runner._check_cost_gate(ctx)
         except RuntimeError as e: # Catch stop throw if desired
            await self._ws_emit(ctx, "cost.budget_alert", {"stop": True, "message": str(e)})
+           ctx.cancelled = True
+        except Exception as e:
+           logger.error(f"C05 check_cost_gate error: {e}")
            ctx.cancelled = True
 
         return ctx

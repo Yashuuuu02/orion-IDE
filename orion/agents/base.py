@@ -26,8 +26,10 @@ class BaseAgent(ABC):
             response_str = await self._call_llm(ctx, context_str)
             parsed = json.loads(response_str)
 
-            # Inject role since the LLM response (or mock) might not include it
+            # Inject role and run_id since the LLM response (or mock) might not include them
             parsed["agent_role"] = self.role.value
+            if "run_id" not in parsed:
+                parsed["run_id"] = ctx.run_id
 
             duration_ms = int((time.time() - start_time) * 1000)
 
