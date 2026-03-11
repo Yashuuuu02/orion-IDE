@@ -108,7 +108,8 @@
 
 .monaco-workbench .part.titlebar > .titlebar-container:not(.has-center) > .titlebar-right {
 	flex: 0 0 auto;
-	padding-left: 16px; /* ensure there is some space between title and controls */
+	padding-left: 16px;
+	/* ensure there is some space between title and controls */
 }
 
 /* Window title text */
@@ -120,8 +121,10 @@
 	text-overflow: ellipsis;
 	margin-left: auto;
 	margin-right: auto;
-	color: #9d9d9d; /* [FORK] Match --wb-text-secondary muted title spec */
-	pointer-events: none; /* [FORK] Non-interactive title text */
+	color: #9d9d9d;
+	/* [FORK] Match --wb-text-secondary muted title spec */
+	pointer-events: none;
+	/* [FORK] Non-interactive title text */
 }
 
 .monaco-workbench.web .part.titlebar > .titlebar-container > .titlebar-center > .window-title,
@@ -216,7 +219,8 @@
 }
 
 .monaco-workbench .part.titlebar > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center:only-child {
-	margin-left: 0; /* no margin if there is only the command center, without nav buttons */
+	margin-left: 0;
+	/* no margin if there is only the command center, without nav buttons */
 }
 
 .monaco-workbench .part.titlebar.inactive > .titlebar-container > .titlebar-center > .window-title > .command-center .action-item.command-center-center {
@@ -245,7 +249,8 @@
 
 .monaco-workbench .part.titlebar > .titlebar-container.counter-zoom .menubar .menubar-menu-button > .menubar-menu-items-holder.monaco-menu-container,
 .monaco-workbench .part.titlebar > .titlebar-container.counter-zoom .monaco-toolbar .dropdown-action-container {
-	zoom: var(--zoom-factor); /* helps to position the menu properly when counter zooming */
+	zoom: var(--zoom-factor);
+	/* helps to position the menu properly when counter zooming */
 }
 
 /* Resizer */
@@ -308,12 +313,14 @@
 /* Window Controls Container Web: Apply WCO environment variables (https://developer.mozilla.org/en-US/docs/Web/CSS/env#titlebar-area-x) */
 .monaco-workbench.web .part.titlebar .titlebar-right .window-controls-container {
 	width: calc(100vw - env(titlebar-area-width, 100vw) - env(titlebar-area-x, 0px));
-	height: env(titlebar-area-height, 35px); /* [FORK] 35px matches --wb-tab-height spec */
+	height: env(titlebar-area-height, 35px);
+	/* [FORK] 35px matches --wb-tab-height spec */
 }
 
 .monaco-workbench.web .part.titlebar .titlebar-left .window-controls-container {
 	width: env(titlebar-area-x, 0px);
-	height: env(titlebar-area-height, 35px); /* [FORK] 35px matches --wb-tab-height spec */
+	height: env(titlebar-area-height, 35px);
+	/* [FORK] 35px matches --wb-tab-height spec */
 }
 
 .monaco-workbench.web.mac .part.titlebar .titlebar-left .window-controls-container {
@@ -469,4 +476,41 @@
 	padding: 0 2px;
 	border-radius: 16px;
 	text-align: center;
+}
+
+/* [FORK] Agent Manager Button Styling */
+.monaco-workbench .part.titlebar .agent-manager-button {
+	display: flex;
+	align-items: center;
+	padding: 0 12px;
+	height: 24px;
+	margin-right: 12px;
+	background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+	color: white;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	-webkit-app-region: no-drag;
+	z-index: 2501;
+	box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.monaco-workbench .part.titlebar .agent-manager-button:hover {
+	filter: brightness(1.1);
+	box-shadow: 0 4px 8px rgba(244, 63, 94, 0.3), 0 0 12px rgba(244, 63, 94, 0.2);
+	transform: translateY(-1px);
+}
+
+.monaco-workbench .part.titlebar .agent-manager-button:active {
+	transform: translateY(0) scale(0.96);
+	box-shadow: 0 1px 2px rgba(244, 63, 94, 0.2);
+}
+
+.monaco-workbench.mac .part.titlebar .agent-manager-button {
+	height: 22px;
+	/* Adjust for macOS titlebar height */
+	padding: 0 10px;
 }
