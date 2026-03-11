@@ -20,10 +20,7 @@ import { isMacintosh, isWindows, isLinux, isWeb, isNative, platformLocale } from
 import { Color } from '../../../../base/common/color.js';
 import { EventType, EventHelper, Dimension, append, $, addDisposableListener, prepend, reset, getWindow, getWindowId, isAncestor, getActiveDocument, isHTMLElement } from '../../../../base/browser/dom.js';
 import { CustomMenubarControl } from './menubarControl.js';
-// eslint-disable-next-line
-import { ipcRenderer } from '../../../../base/parts/sandbox/electron-browser/globals.js';
 import { IInstantiationService, ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
-
 import { Emitter, Event } from '../../../../base/common/event.js';
 import { IStorageService, StorageScope } from '../../../../platform/storage/common/storage.js';
 import { Parts, IWorkbenchLayoutService, ActivityBarPosition, LayoutSettings, EditorActionsLocation, EditorTabsMode } from '../../../services/layout/browser/layoutService.js';
@@ -481,13 +478,6 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
 		// Create Toolbar Actions
 		if (hasCustomTitlebar(this.configurationService, this.titleBarStyle)) {
-			// [FORK] Open Agent Manager Button
-			const agentManagerBtn = append(this.rightContent, $('div.agent-manager-button'));
-			agentManagerBtn.textContent = localize('openAgentManager', "Open Agent Manager");
-			this._register(addDisposableListener(agentManagerBtn, EventType.CLICK, () => {
-				ipcRenderer.invoke('vscode:openAgentManager');
-			}));
-
 			this.actionToolBarElement = append(this.rightContent, $('div.action-toolbar-container'));
 			this.createActionToolBar();
 			this.createActionToolBarMenus();

@@ -2,502 +2,438 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Agent Manager</title>
-	<style>
-		/* [FORK] Agent Manager standalone window — loaded when Next.js is not running */
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Manager</title>
+  <style>
+    /* [FORK] Agent Manager standalone window — loaded when Next.js is not running */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-		:root {
-			--bg: #09090b;
-			--sidebar: #121214;
-			--border: #1d1d21;
-			--accent: #f43f5e;
-			--accent-glow: rgba(244, 63, 94, 0.15);
-			--text: #fafafa;
-			--muted: #71717a;
-			--error: #ef4444;
-			--font-display: 'Inter', system-ui, -apple-system, sans-serif;
-		}
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --border: #2d2d2d;
+      --accent: #007acc;
+      --accent-h: #005fa3;
+      --text: #cccccc;
+      --muted: #9d9d9d;
+      --error: #f44747;
+    }
 
-		body {
-			background: var(--bg);
-			color: var(--text);
-			font-family: var(--font-display);
-			font-size: 13px;
-			height: 100vh;
-			display: flex;
-			flex-direction: column;
-			overflow: hidden;
-			-webkit-user-select: none;
-			user-select: none;
-			letter-spacing: -0.01em;
-		}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
 
-		#titlebar {
-			height: 38px;
-			background: var(--bg);
-			border-bottom: 1px solid var(--border);
-			display: flex;
-			align-items: center;
-			padding: 0 16px;
-			-webkit-app-region: drag;
-			flex-shrink: 0;
-		}
+    #titlebar {
+      height: 35px;
+      background: #1f1f1f;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      -webkit-app-region: drag;
+      flex-shrink: 0;
+    }
 
-		#titlebar h1 {
-			font-size: 11px;
-			color: var(--muted);
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: 0.1em;
-			pointer-events: none;
-		}
+    #titlebar h1 {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+    }
 
-		#toolbar {
-			height: 48px;
-			background: var(--bg);
-			border-bottom: 1px solid var(--border);
-			display: flex;
-			align-items: center;
-			padding: 0 16px;
-			gap: 12px;
-			flex-shrink: 0;
-			-webkit-app-region: no-drag;
-		}
+    #toolbar {
+      height: 44px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      flex-shrink: 0;
+      -webkit-app-region: no-drag;
+    }
 
-		.session-label {
-			font-size: 10px;
-			color: var(--muted);
-			font-weight: 700;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
-		}
+    .session-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-right: 4px;
+    }
 
-		#model-selector {
-			background: var(--sidebar);
-			border: 1px solid var(--border);
-			color: var(--text);
-			border-radius: 6px;
-			padding: 5px 12px;
-			font-size: 12px;
-			font-weight: 500;
-			cursor: pointer;
-			outline: none;
-			transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		}
+    #model-selector {
+      background: #2d2d2d;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
 
-		#model-selector:hover {
-			border-color: var(--muted);
-			background: #1a1a1e;
-		}
+    #model-selector:hover,
+    #model-selector:focus {
+      border-color: var(--accent);
+    }
 
-		#model-selector:focus {
-			border-color: var(--accent);
-			box-shadow: 0 0 0 2px var(--accent-glow);
-		}
+    #clear-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: color 0.12s, border-color 0.12s;
+    }
 
-		#clear-btn {
-			background: transparent;
-			border: 1px solid var(--border);
-			color: var(--muted);
-			border-radius: 6px;
-			padding: 5px 12px;
-			font-size: 12px;
-			font-weight: 500;
-			cursor: pointer;
-			margin-left: auto;
-			transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		}
+    #clear-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
 
-		#clear-btn:hover {
-			color: var(--text);
-			background: #ef444410;
-			border-color: #ef444430;
-		}
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
 
-		#messages {
-			flex: 1;
-			overflow-y: auto;
-			padding: 24px;
-			display: flex;
-			flex-direction: column;
-			gap: 20px;
-			scroll-behavior: smooth;
-		}
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
 
-		#messages::-webkit-scrollbar {
-			width: 4px;
-		}
+    #messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-		#messages::-webkit-scrollbar-track {
-			background: transparent;
-		}
+    #messages::-webkit-scrollbar-thumb {
+      background: #3c3c3c;
+      border-radius: 3px;
+    }
 
-		#messages::-webkit-scrollbar-thumb {
-			background: var(--border);
-			border-radius: 10px;
-		}
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 85%;
+    }
 
-		.message {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-			max-width: 90%;
-			animation: message-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-		}
+    .message.user {
+      align-self: flex-end;
+    }
 
-		@keyframes message-slide {
-			from {
-				opacity: 0;
-				transform: translateY(8px);
-			}
+    .message.assistant {
+      align-self: flex-start;
+    }
 
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-		}
+    .message-bubble {
+      padding: 8px 12px;
+      border-radius: 8px;
+      line-height: 1.5;
+      font-size: 13px;
+    }
 
-		.message.user {
-			align-self: flex-end;
-		}
+    .message.user .message-bubble {
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
 
-		.message.assistant {
-			align-self: flex-start;
-		}
+    .message.assistant .message-bubble {
+      background: #2d2d2d;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 2px;
+    }
 
-		.message-bubble {
-			padding: 12px 16px;
-			border-radius: 12px;
-			line-height: 1.6;
-			font-size: 13px;
-			position: relative;
-		}
+    .message-time {
+      font-size: 10px;
+      color: var(--muted);
+      padding: 0 4px;
+    }
 
-		.message.user .message-bubble {
-			background: var(--accent);
-			color: #fff;
-			border-bottom-right-radius: 4px;
-			box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
-		}
+    .message.user .message-time {
+      text-align: right;
+    }
 
-		.message.assistant .message-bubble {
-			background: var(--sidebar);
-			color: var(--text);
-			border: 1px solid var(--border);
-			border-bottom-left-radius: 4px;
-		}
+    #input-area {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
 
-		.message-time {
-			font-size: 10px;
-			color: var(--muted);
-			font-weight: 500;
-			opacity: 0.6;
-		}
+    #input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: #2d2d2d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      transition: border-color 0.15s;
+    }
 
-		.message.user .message-time {
-			text-align: right;
-		}
+    #input-wrapper:focus-within {
+      border-color: var(--accent);
+    }
 
-		#input-area {
-			padding: 20px;
-			background: linear-gradient(to top, var(--bg), transparent);
-			flex-shrink: 0;
-		}
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 120px;
+      line-height: 1.5;
+      -webkit-user-select: text;
+      user-select: text;
+    }
 
-		#input-wrapper {
-			display: flex;
-			align-items: flex-end;
-			gap: 12px;
-			background: var(--sidebar);
-			border: 1px solid var(--border);
-			border-radius: 12px;
-			padding: 12px 16px;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-		}
+    #chat-input::placeholder {
+      color: var(--muted);
+    }
 
-		#input-wrapper:focus-within {
-			border-color: var(--accent);
-			box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 32px rgba(0, 0, 0, 0.3);
-		}
+    #send-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
 
-		#chat-input {
-			flex: 1;
-			background: transparent;
-			border: none;
-			color: var(--text);
-			font-size: 14px;
-			font-family: inherit;
-			resize: none;
-			outline: none;
-			max-height: 160px;
-			line-height: 1.5;
-			-webkit-user-select: text;
-			user-select: text;
-		}
+    #send-btn:hover:not(:disabled) {
+      background: var(--accent-h);
+      transform: scale(1.05);
+    }
 
-		#chat-input::placeholder {
-			color: var(--muted);
-			opacity: 0.5;
-		}
+    #send-btn:disabled {
+      background: #3c3c3c;
+      cursor: not-allowed;
+    }
 
-		#send-btn {
-			background: var(--accent);
-			border: none;
-			color: #fff;
-			border-radius: 8px;
-			width: 32px;
-			height: 32px;
-			cursor: pointer;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		}
+    .streaming-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 1px;
+      animation: fork-blink 1s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
 
-		#send-btn:hover:not(:disabled) {
-			background: #fb7185;
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-		}
+    @keyframes fork-blink {
+      50% {
+        opacity: 0;
+      }
+    }
 
-		#send-btn:active:not(:disabled) {
-			transform: translateY(0);
-		}
+    /* Empty state */
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      color: var(--muted);
+      opacity: 0.6;
+    }
 
-		#send-btn:disabled {
-			background: var(--border);
-			color: var(--muted);
-			cursor: not-allowed;
-		}
+    .empty-state svg {
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
 
-		.streaming-cursor {
-			display: inline-block;
-			width: 6px;
-			height: 15px;
-			background: var(--accent);
-			border-radius: 4px;
-			animation: cursor-pulse 1.2s ease-in-out infinite;
-			vertical-align: middle;
-			margin-left: 4px;
-		}
-
-		@keyframes cursor-pulse {
-
-			0%,
-			100% {
-				opacity: 1;
-			}
-
-			50% {
-				opacity: 0.3;
-			}
-		}
-
-		/* Empty state */
-		.empty-state {
-			margin: auto;
-			text-align: center;
-			max-width: 280px;
-		}
-
-		.empty-state svg {
-			margin-bottom: 20px;
-			color: var(--accent);
-			filter: drop-shadow(0 0 8px var(--accent-glow));
-		}
-
-		.empty-state p {
-			font-size: 14px;
-			font-weight: 500;
-			line-height: 1.6;
-			color: var(--text);
-			margin-bottom: 8px;
-		}
-
-		.empty-state span {
-			font-size: 12px;
-			color: var(--muted);
-		}
-
-		code {
-			background: #27272a;
-			padding: 2px 4px;
-			border-radius: 4px;
-			font-family: 'JetBrains Mono', monospace;
-			font-size: 0.9em;
-			color: #fb7185;
-		}
-	</style>
+    .empty-state p {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 
 <body>
-	<div id="titlebar">
-		<h1>Agent Manager</h1>
-	</div>
-	<div id="toolbar">
-		<span class="session-label">Model</span>
-		<select id="model-selector">
-			<option value="gemini-pro">Gemini 3.1 Pro (High)</option>
-			<option value="claude-sonnet">Claude Sonnet</option>
-			<option value="gpt-4o">GPT-4o</option>
-		</select>
-		<button id="clear-btn">Clear Session</button>
-	</div>
-	<div id="messages">
-		<div class="empty-state">
-			<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-				stroke-linecap="round" stroke-linejoin="round">
-				<rect x="3" y="11" width="18" height="10" rx="2" />
-				<circle cx="12" cy="5" r="2" />
-				<path d="M12 7v4" />
-				<line x1="8" y1="16" x2="8" y2="16" />
-				<line x1="16" y1="16" x2="16" y2="16" />
-			</svg>
-			<p>Welcome to Orion Agent Manager</p>
-			<span>Ask anything, <code>@</code> to mention, <code>/</code> for workflows</span>
-		</div>
-	</div>
-	<div id="input-area">
-		<div id="input-wrapper">
-			<textarea id="chat-input" rows="1" placeholder="Type a message or '/' for commands..."></textarea>
-			<button id="send-btn" disabled aria-label="Send">
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-					stroke-linecap="round" stroke-linejoin="round">
-					<line x1="22" y1="2" x2="11" y2="13" />
-					<polygon points="22 2 15 22 11 13 2 9 22 2" />
-				</svg>
-			</button>
-		</div>
-	</div>
-	<script>
-		// [FORK] Agent Manager window logic
-		// AGENT_BACKEND is injected by the Electron preload or falls back to localhost
-		const BACKEND_URL = (window.__AGENT_BACKEND__ ?? 'http://localhost:3001');
-		const messagesEl = document.getElementById('messages');
-		const inputEl = document.getElementById('chat-input');
-		const sendBtn = document.getElementById('send-btn');
-		const clearBtn = document.getElementById('clear-btn');
-		const modelSel = document.getElementById('model-selector');
-		let history = [];
-		let emptyState = messagesEl.querySelector('.empty-state');
-
-		// Auto-resize textarea
-		inputEl.addEventListener('input', () => {
-			inputEl.style.height = 'auto';
-			inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-			sendBtn.disabled = inputEl.value.trim() === '';
-		});
-
-		inputEl.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' && !e.shiftKey) {
-				e.preventDefault();
-				if (!sendBtn.disabled) sendMessage();
-			}
-		});
-
-		sendBtn.addEventListener('click', sendMessage);
-		clearBtn.addEventListener('click', () => {
-			history = [];
-			messagesEl.innerHTML = '';
-			const es = document.createElement('div');
-			es.className = 'empty-state';
-			es.innerHTML = `
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
+  <div id="titlebar">
+    <h1>Agent Manager</h1>
+  </div>
+  <div id="toolbar">
+    <span class="session-label">Model</span>
+    <select id="model-selector">
+      <option value="gemini-pro">Gemini 3.1 Pro (High)</option>
+      <option value="claude-sonnet">Claude Sonnet</option>
+      <option value="gpt-4o">GPT-4o</option>
+    </select>
+    <button id="clear-btn">Clear Session</button>
+  </div>
+  <div id="messages">
+    <div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2" />
+        <circle cx="12" cy="5" r="2" />
+        <path d="M12 7v4" />
+        <line x1="8" y1="16" x2="8" y2="16" />
+        <line x1="16" y1="16" x2="16" y2="16" />
+      </svg>
+      <p>Ask anything, <code>@</code> to mention, <code>/</code> for workflows</p>
+    </div>
+  </div>
+  <div id="input-area">
+    <div id="input-wrapper">
+      <textarea id="chat-input" rows="1" placeholder="Ask anything, @ to mention, / for workflows"></textarea>
+      <button id="send-btn" disabled aria-label="Send">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
         </svg>
-        <p>Welcome to Orion Agent Manager</p>
-        <span>Ask anything, <code>@</code> to mention, <code>/</code> for workflows</span>`;
-			messagesEl.appendChild(es);
-			emptyState = es;
-		});
+      </button>
+    </div>
+  </div>
+  <script>
+    // [FORK] Agent Manager window logic
+    // AGENT_BACKEND is injected by the Electron preload or falls back to localhost
+    const BACKEND_URL = (window.__AGENT_BACKEND__ ?? 'http://localhost:3001');
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const modelSel = document.getElementById('model-selector');
+    let history = [];
+    let emptyState = messagesEl.querySelector('.empty-state');
 
-		function formatTime() {
-			return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-		}
+    // Auto-resize textarea
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+      sendBtn.disabled = inputEl.value.trim() === '';
+    });
 
-		function appendMsg(role, content) {
-			if (emptyState) { emptyState.remove(); emptyState = null; }
-			const wrapper = document.createElement('div');
-			wrapper.className = `message ${role}`;
-			const bubble = document.createElement('div');
-			bubble.className = 'message-bubble';
-			bubble.textContent = content;
-			const time = document.createElement('div');
-			time.className = 'message-time';
-			time.textContent = formatTime();
-			wrapper.appendChild(bubble);
-			wrapper.appendChild(time);
-			messagesEl.appendChild(wrapper);
-			messagesEl.scrollTop = messagesEl.scrollHeight;
-			return bubble;
-		}
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) sendMessage();
+      }
+    });
 
-		async function sendMessage() {
-			const text = inputEl.value.trim();
-			if (!text) return;
-			inputEl.value = '';
-			inputEl.style.height = 'auto';
-			sendBtn.disabled = true;
+    sendBtn.addEventListener('click', sendMessage);
+    clearBtn.addEventListener('click', () => {
+      history = [];
+      messagesEl.innerHTML = '';
+      const es = document.createElement('div');
+      es.className = 'empty-state';
+      es.innerHTML = `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg><p>Ask anything, <code>@</code> to mention, <code>/</code> for workflows</p>`;
+      messagesEl.appendChild(es);
+      emptyState = es;
+    });
 
-			history.push({ role: 'user', content: text });
-			appendMsg('user', text);
+    function formatTime() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 
-			const bubble = appendMsg('assistant', '');
-			const cursor = document.createElement('span');
-			cursor.className = 'streaming-cursor';
-			bubble.appendChild(cursor);
+    function appendMsg(role, content) {
+      if (emptyState) { emptyState.remove(); emptyState = null; }
+      const wrapper = document.createElement('div');
+      wrapper.className = `message ${role}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = content;
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = formatTime();
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(time);
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return bubble;
+    }
 
-			try {
-				// [FORK] POST to Node.js backend agent endpoint
-				const res = await fetch(`${BACKEND_URL}/api/agent/chat`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ messages: history, model: modelSel.value }),
-				});
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      sendBtn.disabled = true;
 
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      history.push({ role: 'user', content: text });
+      appendMsg('user', text);
 
-				const reader = res.body.getReader();
-				const decoder = new TextDecoder();
-				let assistantText = '';
+      const bubble = appendMsg('assistant', '');
+      const cursor = document.createElement('span');
+      cursor.className = 'streaming-cursor';
+      bubble.appendChild(cursor);
 
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					const chunk = decoder.decode(value);
-					for (const line of chunk.split('\n')) {
-						if (!line.startsWith('data: ')) continue;
-						const data = line.slice(6).trim();
-						if (data === '[DONE]') continue;
-						try {
-							const parsed = JSON.parse(data);
-							const delta = parsed.choices?.[0]?.delta?.content ?? parsed.text ?? '';
-							assistantText += delta;
-							bubble.textContent = assistantText;
-							bubble.appendChild(cursor);
-							messagesEl.scrollTop = messagesEl.scrollHeight;
-						} catch { }
-					}
-				}
+      try {
+        // [FORK] POST to Node.js backend agent endpoint
+        const res = await fetch(`${BACKEND_URL}/api/agent/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history, model: modelSel.value }),
+        });
 
-				cursor.remove();
-				history.push({ role: 'assistant', content: assistantText });
-			} catch (err) {
-				cursor.remove();
-				bubble.textContent = `Error: ${err.message}`;
-				bubble.style.color = '#f44747';
-			}
-		}
-	</script>
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          for (const line of chunk.split('\n')) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content ?? parsed.text ?? '';
+              assistantText += delta;
+              bubble.textContent = assistantText;
+              bubble.appendChild(cursor);
+              messagesEl.scrollTop = messagesEl.scrollHeight;
+            } catch { }
+          }
+        }
+
+        cursor.remove();
+        history.push({ role: 'assistant', content: assistantText });
+      } catch (err) {
+        cursor.remove();
+        bubble.textContent = `Error: ${err.message}`;
+        bubble.style.color = '#f44747';
+      }
+    }
+  </script>
 </body>
 
 </html>
