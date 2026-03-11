@@ -39,7 +39,10 @@ async def test_pipeline_planning_full_run():
     # Mock ws_emit
     emitted = []
     async def mock_ws_emit(ctx, event, payload=None):
-        emitted.append(event)
+        if isinstance(event, dict):
+            emitted.append(event.get("type", ""))
+        else:
+            emitted.append(event)
 
     # We need to auto-resolve approvals (IISG from C03, Planner from C05)
     async def mock_wait_for_approval(run_id, approval_type, timeout_seconds=300):
