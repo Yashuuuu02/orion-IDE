@@ -27,7 +27,7 @@ import { LocalChatSessionUri, getChatSessionType } from '../../../common/model/c
 import { IClearEditingSessionConfirmationOptions } from '../../actions/chatActions.js';
 import type { IChatEditorOptions } from './chatEditor.js';
 
-const ChatEditorIcon = registerIcon('chat-editor-label-icon', Codicon.chatSparkle, nls.localize('chatEditorLabelIcon', 'Icon of the chat editor label.'));
+const ChatEditorIcon = registerIcon('chat-editor-label-icon', Codicon.starFull, nls.localize('chatEditorLabelIcon', 'Icon of the chat editor label.'));
 
 export class ChatEditorInput extends EditorInput implements IEditorCloseHandler {
 	static readonly TypeID: string = 'workbench.input.chatSession';

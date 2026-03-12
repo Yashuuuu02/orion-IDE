@@ -128,7 +128,7 @@ registerAction2(NewChatInSessionsWindowAction);
 // Registers in the same ChatBar container as the existing ChatViewPane.
 // The `when` clause ensures only the new-session pane shows when no active session exists.
 
-const chatViewIcon = registerIcon('chat-view-icon', Codicon.chatSparkle, localize('chatViewIcon', 'View icon of the chat view.'));
+const chatViewIcon = registerIcon('chat-view-icon', Codicon.starFull, localize('chatViewIcon', 'View icon of the chat view.'));
 
 class RegisterChatViewContainerContribution implements IWorkbenchContribution {
 

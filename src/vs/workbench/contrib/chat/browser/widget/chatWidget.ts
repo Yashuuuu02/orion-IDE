@@ -19,7 +19,7 @@ import { IMarkdownString, MarkdownString } from '../../../../../base/common/html
 import { Iterable } from '../../../../../base/common/iterator.js';
 import { Disposable, DisposableStore, IDisposable, MutableDisposable, thenIfNotDisposed } from '../../../../../base/common/lifecycle.js';
 import { ResourceSet } from '../../../../../base/common/map.js';
-import { Schemas } from '../../../../../base/common/network.js';
+import { FileAccess, Schemas } from '../../../../../base/common/network.js';
 import { IsSessionsWindowContext } from '../../../../common/contextkeys.js';
 import { filter } from '../../../../../base/common/objects.js';
 import { autorun, derived, observableFromEvent, observableValue } from '../../../../../base/common/observable.js';
@@ -1143,7 +1143,7 @@ export class ChatWidget extends Disposable implements IChatWidget {
 		return {
 			title,
 			message: new MarkdownString(DISCLAIMER),
-			icon: Codicon.chatSparkle,
+			icon: FileAccess.asBrowserUri('vs/workbench/contrib/chat/browser/media/orion-star.svg'),
 			additionalMessage,
 		};
 	}

@@ -35,7 +35,7 @@ import { ChatViewPane } from './widgetHosts/viewPane/chatViewPane.js';
 
 // --- Chat Container &  View Registration
 
-const chatViewIcon = registerIcon('chat-view-icon', Codicon.chatSparkle, localize('chatViewIcon', 'View icon of the chat view.'));
+const chatViewIcon = registerIcon('chat-view-icon', Codicon.starFull, localize('chatViewIcon', 'View icon of the chat view.'));
 
 const chatViewContainer: ViewContainer = Registry.as<IViewContainersRegistry>(ViewExtensions.ViewContainersRegistry).registerViewContainer({
 	id: ChatViewContainerId,

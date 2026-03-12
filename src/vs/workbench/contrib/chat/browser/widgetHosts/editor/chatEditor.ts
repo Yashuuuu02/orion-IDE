@@ -99,95 +99,6 @@ export class ChatEditor extends AbstractEditorWithViewState<IChatEditorViewState
 		const scopedInstantiationService = this._register(this.instantiationService.createChild(new ServiceCollection([IContextKeyService, this.scopedContextKeyService])));
 		ChatContextKeys.inChatEditor.bindTo(this._scopedContextKeyService).set(true);
 
-		// [FORK] OrionIDE - Pear AI Style Agent Sidebar Layout
-		const wrapper = dom.$('.orion-side-agent-wrapper');
-		const header = dom.$('.orion-side-agent-header');
-		const toggles = dom.$('.orion-mode-toggles');
-
-		const createToggle = (name: string, iconClass: string, isActive: boolean) => {
-			const el = dom.$(`.orion-mode-toggle.${name.toLowerCase()}${isActive ? '.active' : ''}`);
-			dom.append(el, dom.$(`span.icon.codicon.${iconClass}`));
-			dom.append(el, dom.$('span.text', undefined, name));
-			return el;
-		};
-
-		const agentToggle = createToggle('Agent', 'codicon-hubot', false);
-		const chatToggle = createToggle('Chat', 'codicon-comment-discussion', true);
-		const searchToggle = createToggle('Search', 'codicon-search', false);
-		const memoryToggle = createToggle('Memory', 'codicon-database', false);
-
-		dom.append(toggles, agentToggle, chatToggle, searchToggle, memoryToggle);
-
-		const actions = dom.$('.orion-side-agent-actions');
-		['codicon-add', 'codicon-history'].forEach(ic => {
-			dom.append(actions, dom.$(`span.action-icon.codicon.${ic}`));
-		});
-
-		dom.append(header, toggles, actions);
-
-		const contentArea = dom.$('.orion-side-agent-content');
-		const welcomeScreen = dom.$('.orion-welcome-screen');
-
-		const clearNode = (node: HTMLElement) => {
-			while (node.firstChild) {
-				node.removeChild(node.firstChild);
-			}
-		};
-
-		const updateWelcome = (mode: string) => {
-			clearNode(welcomeScreen);
-			if (mode === 'Chat') {
-				dom.append(welcomeScreen, dom.$('h2', undefined, 'OrionIDE Chat'));
-				dom.append(welcomeScreen, dom.$('.subtitle', undefined, 'Powered by OrionIDE'));
-				dom.append(welcomeScreen, dom.$('p', undefined, 'Ask questions about the code or make changes.'));
-				const shortcuts = dom.$('.shortcuts');
-				dom.append(shortcuts, dom.$('div', undefined, '⌘ + I Make inline edits'));
-				dom.append(shortcuts, dom.$('div', undefined, '⌘ + L Add selection to chat'));
-				dom.append(welcomeScreen, shortcuts);
-			} else if (mode === 'Agent') {
-				dom.append(welcomeScreen, dom.$('h2', undefined, 'OrionIDE Coding Agent'));
-				dom.append(welcomeScreen, dom.$('.subtitle', undefined, 'Powered by OrionIDE'));
-				dom.append(welcomeScreen, dom.$('p', undefined, 'Autonomous coding agent that has access to your development environment (with your permission) for a feedback loop to add features, fix bugs, and more.'));
-				const autoApprove = dom.$('label.auto-approve');
-				const cb = dom.$('input') as HTMLInputElement;
-				cb.type = 'checkbox';
-				cb.checked = true;
-				dom.append(autoApprove, cb, dom.$('span', undefined, ' Auto-approve: Read, Write, Execute, Browser, MCP...'));
-				dom.append(welcomeScreen, autoApprove);
-			} else if (mode === 'Search') {
-				dom.append(welcomeScreen, dom.$('h2', undefined, 'OrionIDE Search'));
-				dom.append(welcomeScreen, dom.$('.subtitle', undefined, 'Powered by Perplexity'));
-				dom.append(welcomeScreen, dom.$('p', undefined, 'AI-powered search engine: up-to-date information for docs, libraries, etc. Also good for non-coding specific questions.'));
-			} else if (mode === 'Memory') {
-				dom.append(welcomeScreen, dom.$('h2', undefined, 'OrionIDE Memory'));
-				dom.append(welcomeScreen, dom.$('.subtitle', undefined, 'Local Memory Storage'));
-				dom.append(welcomeScreen, dom.$('p', undefined, 'OrionIDE Memory allows you to add information for OrionIDE to remember. Add memories to personalize your building experience!'));
-				dom.append(welcomeScreen, dom.$('p', undefined, 'No memories yet - Click the button below to add memories.'));
-				const btn = dom.$('button.add-memory-btn', undefined, 'Add Memory');
-				dom.append(welcomeScreen, btn);
-			}
-		};
-		updateWelcome('Chat');
-
-		const allToggles = [
-			{ el: agentToggle, name: 'Agent' },
-			{ el: chatToggle, name: 'Chat' },
-			{ el: searchToggle, name: 'Search' },
-			{ el: memoryToggle, name: 'Memory' }
-		];
-		allToggles.forEach(t => {
-			t.el.onclick = () => {
-				allToggles.forEach(x => x.el.classList.remove('active'));
-				t.el.classList.add('active');
-				updateWelcome(t.name);
-			};
-		});
-
-		const chatWidgetContainer = dom.$('.orion-chat-widget-container');
-		dom.append(contentArea, welcomeScreen, chatWidgetContainer);
-		dom.append(wrapper, header, contentArea);
-		dom.append(parent, wrapper);
-
 		this._widget = this._register(
 			scopedInstantiationService.createInstance(
 				ChatWidget,
@@ -219,7 +130,7 @@ export class ChatEditor extends AbstractEditorWithViewState<IChatEditorViewState
 		this._register(this.widget.onDidSubmitAgent(() => {
 			this.group.pinEditor(this.input);
 		}));
-		this.widget.render(chatWidgetContainer);
+		this.widget.render(parent);
 		this.widget.setVisible(true);
 	}
 
@@ -379,9 +290,7 @@ export class ChatEditor extends AbstractEditorWithViewState<IChatEditorViewState
 	override layout(dimension: dom.Dimension, position?: dom.IDomPosition | undefined): void {
 		this.dimension = dimension;
 		if (this.widget) {
-			const wrapperWidth = Math.min(450, dimension.width);
-			const headerHeight = 60; // rough height to account for header + spacing
-			this.widget.layout(dimension.height - headerHeight, wrapperWidth - 32); // -32 for left/right padding
+			this.widget.layout(dimension.height, dimension.width);
 		}
 	}
 }

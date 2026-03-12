@@ -965,7 +965,7 @@ export class ChatListItemRenderer extends Disposable implements ITreeRenderer<Ch
 		} else if (agent?.icon) {
 			return agent.icon;
 		} else {
-			return Codicon.chatSparkle;
+			return Codicon.starFull;
 		}
 	}
 
