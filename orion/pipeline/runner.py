@@ -105,8 +105,11 @@ class PipelineRunner:
                 await ws_emit(ctx, "pipeline.cancelled", {})
             else:
                 logger.info(f"Pipeline completed successfully: run_id={ctx.run_id}")
+                exec_info = getattr(ctx, 'execution', {}) or {}
                 await ws_emit(ctx, "pipeline.completed", {
                     "run_id": ctx.run_id,
+                    "files_written": exec_info.get("files_written", 0),
+                    "total": exec_info.get("total", 0),
                     "duration_ms": int((time.time() - ctx.run_id_int) * 1000) if hasattr(ctx, 'run_id_int') else 0
                 })
 

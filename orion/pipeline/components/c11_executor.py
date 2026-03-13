@@ -78,6 +78,7 @@ class AtomicExecutor(BaseComponent):
                             "index": i + 1,
                             "total": total,
                             "absolute_path": str(target),
+                            "content": content or "",
                         })
 
                     elif operation == "modify":
@@ -98,6 +99,7 @@ class AtomicExecutor(BaseComponent):
                             "index": i + 1,
                             "total": total,
                             "absolute_path": str(target),
+                            "content": content or "",
                         })
 
                     elif operation == "delete":

@@ -12,6 +12,9 @@ import { IChatProgress } from '../common/chatService/chatService.js';
 import { ChatAgentLocation, ChatModeKind } from '../common/constants.js';
 import { IWorkspaceContextService } from '../../../../platform/workspace/common/workspace.js';
 import { IMainProcessService } from '../../../../platform/ipc/common/mainProcessService.js';
+import { IFileService } from '../../../../platform/files/common/files.js';
+import { URI } from '../../../../base/common/uri.js';
+import { VSBuffer } from '../../../../base/common/buffer.js';
 
 const ORION_AGENT_ID = 'orion.agent';
 
@@ -19,7 +22,10 @@ const ORION_AGENT_ID = 'orion.agent';
 let activePlanRunId: string | null = null;
 
 class OrionChatAgentImplementation implements IChatAgentImplementation {
-	constructor(private readonly mainProcessService: IMainProcessService) {}
+	constructor(
+		private readonly mainProcessService: IMainProcessService,
+		private readonly fileService: IFileService
+	) {}
 
 	async invoke(
 		request: IChatAgentRequest,
@@ -204,6 +210,13 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 					const addedLines = msg['lines_added'] as number;
 					const idx = msg['index'] as number;
 					const total = msg['total'] as number;
+					const absPath = msg['absolute_path'] as string;
+					const content = msg['content'] as string | undefined;
+
+					if (absPath && content !== undefined) {
+						this.fileService.writeFile(URI.file(absPath), VSBuffer.fromString(content));
+					}
+
 					progress([{ kind: 'markdownContent', content: { value: `\n✅ **Created** \`${fp}\` · +${addedLines} lines [${idx}/${total}]` } }]);
 
 				} else if (type === 'file.modified') {
@@ -212,6 +225,13 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 					const removed = msg['lines_removed'] as number;
 					const idx = msg['index'] as number;
 					const total = msg['total'] as number;
+					const absPath = msg['absolute_path'] as string;
+					const content = msg['content'] as string | undefined;
+
+					if (absPath && content !== undefined) {
+						this.fileService.writeFile(URI.file(absPath), VSBuffer.fromString(content));
+					}
+
 					progress([{ kind: 'markdownContent', content: { value: `\n✏️ **Modified** \`${fp}\` · +${added} -${removed} lines [${idx}/${total}]` } }]);
 
 				} else if (type === 'file.deleted') {
@@ -238,7 +258,12 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 					progress([{ kind: 'markdownContent', content: { value: String(msg['content'] ?? '') } }]);
 
 				} else if (type === 'pipeline.completed') {
-					progress([{ kind: 'markdownContent', content: { value: '\n\n✅ **Orion pipeline complete.**' } }]);
+					const fw = msg['files_written'] as number ?? 0;
+					const total = msg['total'] as number ?? 0;
+					const summary = total > 0
+						? `\n\n✅ **Done.** ${fw}/${total} files written.`
+						: '\n\n✅ **Orion pipeline complete.**';
+					progress([{ kind: 'markdownContent', content: { value: summary } }]);
 					cleanup();
 
 				} else if (type === 'pipeline.failed') {
@@ -283,7 +308,8 @@ export class OrionChatAgentContribution extends Disposable implements IWorkbench
 	constructor(
 		@IChatAgentService private readonly chatAgentService: IChatAgentService,
 		@IWorkspaceContextService workspaceContextService: IWorkspaceContextService,
-		@IMainProcessService mainProcessService: IMainProcessService
+		@IMainProcessService mainProcessService: IMainProcessService,
+		@IFileService fileService: IFileService
 	) {
 		super();
 
@@ -317,7 +343,7 @@ export class OrionChatAgentContribution extends Disposable implements IWorkbench
 
 		this._register(this.chatAgentService.registerAgentImplementation(
 			ORION_AGENT_ID,
-			new OrionChatAgentImplementation(mainProcessService)
+			new OrionChatAgentImplementation(mainProcessService, fileService)
 		));
 	}
 }
