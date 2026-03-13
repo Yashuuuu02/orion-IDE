@@ -32,11 +32,8 @@ class AtomicExecutor(BaseComponent):
 
         file_changes = self._get_file_changes(ctx)
         if not file_changes:
-            logger.info("C11: No file changes to apply")
-            await self._ws_emit(ctx, "execution.complete", {
-                "files_written": 0,
-                "message": "No file changes to apply"
-            })
+            logger.error("C11: AI generated no code (file_changes is empty)")
+            ctx.error = "AI generated no code"
             return ctx
 
         if ctx.mode == RunMode.FAST:
@@ -143,11 +140,15 @@ class AtomicExecutor(BaseComponent):
                 "status": "completed"
             }
 
-            await self._ws_emit(ctx, "execution.complete", {
-                "files_written": files_written,
-                "total": total,
-            })
-            logger.info(f"C11: Applied {files_written}/{total} file changes")
+            if files_written == 0:
+                ctx.error = "AI generated no code"
+                logger.error(f"C11: Failed to write any files (total={total}). Pipeline failed.")
+            else:
+                await self._ws_emit(ctx, "execution.complete", {
+                    "files_written": files_written,
+                    "total": total,
+                })
+                logger.info(f"C11: Applied {files_written}/{total} file changes")
 
         except Exception as e:
             logger.error(f"C11: Execution failed: {e}")
