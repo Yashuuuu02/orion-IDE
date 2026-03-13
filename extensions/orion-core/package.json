@@ -1,0 +1,40 @@
+{
+  "name": "orion-core",
+  "displayName": "Orion Core",
+  "description": "Orion deterministic AI pipeline extension",
+  "version": "1.0.0",
+  "publisher": "orion",
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "orion.agent",
+        "name": "orion",
+        "description": "Orion deterministic AI pipeline",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "plan",
+            "description": "Run full 15-component Planning Mode"
+          },
+          {
+            "name": "fast",
+            "description": "Run 7-component Fast Mode"
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/vscode": "^1.110.0",
+    "typescript": "^5.9.3",
+    "ws": "^8.19.0"
+  }
+}

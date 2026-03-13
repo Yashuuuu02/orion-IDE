@@ -1,0 +1,26 @@
+{
+  "site_package_search_strategy": "pep503",
+  "source_directories": ["."],
+  "search_path": [
+    ".",
+    ".venv\\Lib\\site-packages",
+    ".venv/Lib/site-packages"
+  ],
+  "python_version": "3.11",
+  "venv_path": ".venv",
+  "strict": false,
+  "ignore_all_errors": [
+    "orion/pipeline/components",
+    "orion/api",
+    "orion/core",
+    "orion/schemas",
+    "orion/llm",
+    "orion/pipeline",
+    "orion/db",
+    "orion/skills",
+    "orion/agents",
+    "orion/mcp",
+    "orion/models",
+    ".venv"
+  ]
+}

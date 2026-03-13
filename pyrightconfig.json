@@ -1,0 +1,10 @@
+{
+  "include": ["orion"],
+  "extraPaths": [
+    ".",
+    "c:\\Users\\Shreyash\\.gemini\\antigravity\\scratch\\orion-IDE"
+  ],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "off",
+  "pythonPlatform": "Windows"
+}

@@ -67,7 +67,21 @@ class Planner(BaseComponent):
         else:
             ctx.cost_estimate = (total_tokens / 1000) * cost_per_1k
 
-        await self._ws_emit(ctx, "cost.estimate")
+        # Build file plan summary for UI display
+        file_plan = []
+        if isinstance(ctx.task_dag, dict):
+            file_plan = ctx.task_dag.get("file_changes", [])
+            if not file_plan:
+                # Try to extract from tasks
+                for task in ctx.task_dag.get("tasks", []):
+                    if isinstance(task, dict) and "file_changes" in task:
+                        file_plan.extend(task["file_changes"])
+
+        await self._ws_emit(ctx, "cost.estimate", {
+            "cost_estimate": ctx.cost_estimate,
+            "file_plan": file_plan,
+            "file_count": len(file_plan),
+        })
 
         # COST GATE
         if ctx.cost_estimate and ctx.run_config.cost_cap_usd is not None and ctx.cost_estimate > ctx.run_config.cost_cap_usd:
@@ -85,6 +99,15 @@ class Planner(BaseComponent):
         # In planning mode, we wait for user approval of the plan before proceeding
         # (This implies the UI will show the DAG/Blueprint and let the user say "Go")
         try:
+            # Emit the plan to UI before waiting for approval
+            await self._ws_emit(ctx, "plan.ready", {
+                "run_id": ctx.run_id,
+                "task_dag": ctx.task_dag,
+                "file_plan": file_plan,
+                "file_count": len(file_plan),
+                "cost_estimate": ctx.cost_estimate,
+                "message": "Review the plan and type 'proceed' to execute, or 'cancel' to abort.",
+            })
             decision = await asyncio.wait_for(
                 runner_module.pipeline_runner._wait_for_approval(ctx.run_id, "planner"),
                 timeout=300.0

@@ -1,0 +1,775 @@
+﻿
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\base\common\product.ts
+LineNumber : 225
+Line       : 	readonly defaultChatAgent: IDefaultChatAgent;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\base\common\product.ts
+LineNumber : 338
+Line       : export interface IDefaultChatAgent {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\editor\common\services\com
+             pletionsEnablement.ts
+LineNumber : 16
+Line       : 	return product.defaultChatAgent?.completionsEnablementSetting;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\editor\contrib\inlineCompl
+             etions\browser\model\inlineCompletionsSource.ts
+LineNumber : 114
+Line       : 		const enablementSetting = product.defaultChatAgent?.completionsEnablementSetting ?? 
+             undefined;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\configuration\com
+             mon\configurationRegistry.ts
+LineNumber : 1026
+Line       : export const EXTENSION_UNIFICATION_EXTENSION_IDS: Set<string> = new 
+             Set(product.defaultChatAgent ? [product.defaultChatAgent.extensionId, 
+             product.defaultChatAgent.chatExtensionId].map(id => id.toLowerCase()) : []);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\abstractExtensionManagementService.ts
+LineNumber : 942
+Line       : 		if (areSameExtensions(extension.identifier, { id: 
+             this.productService.defaultChatAgent.extensionId })) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1162
+Line       : 			let defaultChatAgentExtension: IGalleryExtension | undefined;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1166
+Line       : 				if (areSameExtensions(extension.identifier, { id: 
+             this.productService.defaultChatAgent.extensionId, })) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1167
+Line       : 					defaultChatAgentExtension = extension;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1172
+Line       : 			if (defaultChatAgentExtension) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1173
+Line       : 				result.push(defaultChatAgentExtension);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1994
+Line       : 		deprecated[this.productService.defaultChatAgent.extensionId.toLowerCase()] = {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\extensionManageme
+             nt\common\extensionGalleryService.ts
+LineNumber : 1997
+Line       : 				id: this.productService.defaultChatAgent.chatExtensionId,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\product\common\pr
+             oduct.ts
+LineNumber : 74
+Line       : 			defaultChatAgent: {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\userDataProfile\c
+             ommon\userDataProfile.ts
+LineNumber : 330
+Line       : 		return { ...defaultProfile, extensionsResource: 
+             this.getDefaultProfileExtensionsLocation() ?? defaultProfile.extensionsResource, 
+             isDefault: true };
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\platform\userDataSync\comm
+             on\userDataSyncResourceProvider.ts
+LineNumber : 426
+Line       : 		return stringifyLocalProfiles(this.userDataProfilesService.profiles.filter(p => 
+             !p.isDefault && !p.isTransient), true);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\sessions\contrib\changes\b
+             rowser\changesView.contribution.ts
+LineNumber : 29
+Line       : }, ViewContainerLocation.AuxiliaryBar, { doNotRegisterOpenCommand: true, isDefault: true 
+             });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\sessions\contrib\chat\brow
+             ser\chat.contribution.ts
+LineNumber : 158
+Line       : 		}, ViewContainerLocation.ChatBar, { isDefault: true, doNotRegisterOpenCommand: true });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\sessions\contrib\sessions\
+             browser\sessions.contribution.ts
+LineNumber : 32
+Line       : }, ViewContainerLocation.Sidebar, { isDefault: true });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\sessions\contrib\welcome\b
+             rowser\welcome.contribution.ts
+LineNumber : 144
+Line       : 		if (!this.productService.defaultChatAgent?.chatExtensionId) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\api\common\extHo
+             stLanguageModels.ts
+LineNumber : 199
+Line       : 				if (m.isDefault === true) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\api\common\extHo
+             stLanguageModels.ts
+LineNumber : 202
+Line       : 							isDefaultForLocation[key as ChatAgentLocation] = true;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\api\common\extHo
+             stTask.ts
+LineNumber : 327
+Line       : 				if (value.group.isDefault === true) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatParticipant.contribution.ts
+LineNumber : 48
+Line       : }, ViewContainerLocation.AuxiliaryBar, { isDefault: true, doNotRegisterOpenCommand: true 
+             });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatParticipant.contribution.ts
+LineNumber : 341
+Line       : 				const chatExtension = notification?.extensions.find(ext => 
+             ExtensionIdentifier.equals(ext.identifier.id, 
+             this.productService.defaultChatAgent?.chatExtensionId));
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatParticipant.contribution.ts
+LineNumber : 360
+Line       : 		const commandButton = 
+             `[${showExtensionLabel}](${createCommandUri(showExtensionsWithIdsCommandId, 
+             [this.productService.defaultChatAgent?.chatExtensionId])})`;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatTipService.ts
+LineNumber : 807
+Line       : 		const defaultChatAgent = this._productService.defaultChatAgent;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatTipService.ts
+LineNumber : 808
+Line       : 		return !!defaultChatAgent?.chatExtensionId;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatActions.ts
+LineNumber : 91
+Line       : 	manageSettingsUrl: product.defaultChatAgent?.manageSettingsUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatActions.ts
+LineNumber : 92
+Line       : 	provider: product.defaultChatAgent?.provider ?? { enterprise: { id: '' } },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatActions.ts
+LineNumber : 93
+Line       : 	completionsAdvancedSetting: product.defaultChatAgent?.completionsAdvancedSetting ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatActions.ts
+LineNumber : 94
+Line       : 	completionsMenuCommand: product.defaultChatAgent?.completionsMenuCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 13
+Line       : import { IDefaultChatAgent } from '../../../../../base/common/product.js';
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 33
+Line       : 		const defaultChatAgent = this.productService.defaultChatAgent;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 35
+Line       : 		if (!defaultChatAgent || hideWelcomeView) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 39
+Line       : 		this.registerListeners(defaultChatAgent);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 42
+Line       : 	private registerListeners(defaultChatAgent: IDefaultChatAgent): void {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 46
+Line       : 				if (ExtensionIdentifier.equals(defaultChatAgent.extensionId, e.identifier.id) && 
+             e.operation === InstallOperation.Install) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\actions\chatGettingStarted.ts
+LineNumber : 55
+Line       : 				if (ExtensionIdentifier.equals(defaultChatAgent.extensionId, ext.value)) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetup.ts
+LineNumber : 15
+Line       : 	completionsRefreshTokenCommand: 
+             product.defaultChatAgent?.completionsRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetup.ts
+LineNumber : 16
+Line       : 	chatRefreshTokenCommand: product.defaultChatAgent?.chatRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetup.ts
+LineNumber : 17
+Line       : 	providerExtensionId: product.defaultChatAgent?.providerExtensionId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 57
+Line       : 	chatExtensionId: product.defaultChatAgent?.chatExtensionId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 58
+Line       : 	manageOveragesUrl: product.defaultChatAgent?.manageOverageUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 59
+Line       : 	upgradePlanUrl: product.defaultChatAgent?.upgradePlanUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 60
+Line       : 	completionsRefreshTokenCommand: 
+             product.defaultChatAgent?.completionsRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 61
+Line       : 	chatRefreshTokenCommand: product.defaultChatAgent?.chatRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 117
+Line       : 							const { agent, disposable } = 
+             SetupAgent.registerDefaultAgents(this.instantiationService, ChatAgentLocation.Chat, 
+             mode, context, controller);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 134
+Line       : 						disposables.add(SetupAgent.registerDefaultAgents(this.instantiationService, 
+             ChatAgentLocation.Terminal, ChatModeKind.Ask, context, controller).disposable);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 135
+Line       : 						disposables.add(SetupAgent.registerDefaultAgents(this.instantiationService, 
+             ChatAgentLocation.Notebook, ChatModeKind.Ask, context, controller).disposable);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupContributions.ts
+LineNumber : 136
+Line       : 						disposables.add(SetupAgent.registerDefaultAgents(this.instantiationService, 
+             ChatAgentLocation.EditorInline, ChatModeKind.Ask, context, controller).disposable);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupController.ts
+LineNumber : 36
+Line       : 	chatExtensionId: product.defaultChatAgent?.chatExtensionId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupController.ts
+LineNumber : 37
+Line       : 	provider: product.defaultChatAgent?.provider ?? { default: { id: '', name: '' }, 
+             enterprise: { id: '', name: '' }, apple: { id: '', name: '' }, google: { id: '', name: 
+             '' } },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupController.ts
+LineNumber : 38
+Line       : 	providerUriSetting: product.defaultChatAgent?.providerUriSetting ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupController.ts
+LineNumber : 39
+Line       : 	completionsAdvancedSetting: product.defaultChatAgent?.completionsAdvancedSetting ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 60
+Line       : 	extensionId: product.defaultChatAgent?.extensionId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 61
+Line       : 	chatExtensionId: product.defaultChatAgent?.chatExtensionId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 62
+Line       : 	provider: product.defaultChatAgent?.provider ?? { default: { id: '', name: '' }, 
+             enterprise: { id: '', name: '' }, apple: { id: '', name: '' }, google: { id: '', name: 
+             '' } },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 63
+Line       : 	outputChannelId: product.defaultChatAgent?.chatExtensionOutputId ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 64
+Line       : 	outputExtensionStateCommand: 
+             product.defaultChatAgent?.chatExtensionOutputExtensionStateCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupProviders.ts
+LineNumber : 74
+Line       : 	static registerDefaultAgents(instantiationService: IInstantiationService, location: 
+             ChatAgentLocation, mode: ChatModeKind, context: ChatEntitlementContext, controller: 
+             Lazy<ChatSetupController>): { agent: SetupAgent; disposable: IDisposable } {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 38
+Line       : 	publicCodeMatchesUrl: product.defaultChatAgent?.publicCodeMatchesUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 39
+Line       : 	provider: product.defaultChatAgent?.provider ?? { default: { id: '', name: '' }, 
+             enterprise: { id: '', name: '' }, apple: { id: '', name: '' }, google: { id: '', name: 
+             '' } },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 40
+Line       : 	manageSettingsUrl: product.defaultChatAgent?.manageSettingsUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 41
+Line       : 	completionsRefreshTokenCommand: 
+             product.defaultChatAgent?.completionsRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 42
+Line       : 	chatRefreshTokenCommand: product.defaultChatAgent?.chatRefreshTokenCommand ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 43
+Line       : 	termsStatementUrl: product.defaultChatAgent?.termsStatementUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatSetup\chatSetupRunner.ts
+LineNumber : 44
+Line       : 	privacyStatementUrl: product.defaultChatAgent?.privacyStatementUrl ?? ''
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatStatus\chatStatusDashboard.ts
+LineNumber : 52
+Line       : const defaultChat = product.defaultChatAgent;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\chatStatus\chatStatusEntry.ts
+LineNumber : 87
+Line       : 			if (e.affectsConfiguration(product.defaultChatAgent?.completionsEnablementSetting)) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widget\chatWidget.ts
+LineNumber : 988
+Line       : 					const providers = product.defaultChatAgent.provider;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widget\chatWidget.ts
+LineNumber : 989
+Line       : 					additionalMessage = new MarkdownString(localize({ key: 'settings', comment: 
+             ['{Locked="]({2})"}', '{Locked="]({3})"}'] }, "By continuing with {0} Copilot, you agree 
+             to {1}'s [Terms]({2}) and [Privacy Statement]({3}).", providers.default.name, 
+             providers.default.name, product.defaultChatAgent.termsStatementUrl, 
+             product.defaultChatAgent.privacyStatementUrl), { isTrusted: true });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widget\input\chatInputPart.ts
+LineNumber : 742
+Line       : 		const persistedAsDefault = 
+             this.storageService.getBoolean(this.getSelectedModelIsDefaultStorageKey(), 
+             StorageScope.APPLICATION, true);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widget\input\chatModelPicker.ts
+LineNumber : 576
+Line       : 			this._productService.defaultChatAgent?.manageSettingsUrl,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widget\input\modePickerActionItem.ts
+LineNumber : 306
+Line       : 	const chatExtensionId = productService.defaultChatAgent?.chatExtensionId;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\bro
+             wser\widgetHosts\chatQuick.ts
+LineNumber : 281
+Line       : 				const renderedMarkdown = disposables.add(this.markdownRendererService.render(new 
+             MarkdownString(localize({ key: 'termsDisclaimer', comment: ['{Locked="]({2})"}', 
+             '{Locked="]({3})"}'] }, "By continuing with {0} Copilot, you agree to {1}'s [Terms]({2}) 
+             and [Privacy Statement]({3})", product.defaultChatAgent?.provider?.default?.name ?? '', 
+             product.defaultChatAgent?.provider?.default?.name ?? '', 
+             product.defaultChatAgent?.termsStatementUrl ?? '', 
+             product.defaultChatAgent?.privacyStatementUrl ?? ''), { isTrusted: true })));
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\promptSyntax\utils\promptFilesLocator.ts
+LineNumber : 118
+Line       : 					isDefault: true
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\promptSyntax\utils\promptsServiceUtils.ts
+LineNumber : 22
+Line       : 	const chatExtensionId = productService.defaultChatAgent?.chatExtensionId;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\promptSyntax\utils\promptsServiceUtils.ts
+LineNumber : 40
+Line       : 	const chatExtensionId = productService.defaultChatAgent?.chatExtensionId;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\tools\languageModelToolsContribution.ts
+LineNumber : 260
+Line       : 					const isBuiltinTool = productService.defaultChatAgent?.chatExtensionId ?
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\tools\languageModelToolsContribution.ts
+LineNumber : 261
+Line       : 						ExtensionIdentifier.equals(extension.description.identifier, 
+             productService.defaultChatAgent.chatExtensionId) :
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\tools\languageModelToolsContribution.ts
+LineNumber : 302
+Line       : 				const isBuiltinTool = productService.defaultChatAgent?.chatExtensionId ?
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\chat\com
+             mon\tools\languageModelToolsContribution.ts
+LineNumber : 303
+Line       : 					ExtensionIdentifier.equals(extension.description.identifier, 
+             productService.defaultChatAgent.chatExtensionId) :
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\extensio
+             ns\browser\extensionsWorkbenchService.ts
+LineNumber : 2743
+Line       : 		if (!areSameExtensions(extension.identifier, { id: 
+             this.productService.defaultChatAgent.extensionId })) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\files\br
+             owser\explorerViewlet.ts
+LineNumber : 273
+Line       : }, ViewContainerLocation.Sidebar, { isDefault: true });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\inlineCh
+             at\browser\inlineChatWidget.ts
+LineNumber : 317
+Line       : 				const renderedMarkdown = disposables.add(this._markdownRendererService.render(new 
+             MarkdownString(localize({ key: 'termsDisclaimer', comment: ['{Locked="]({2})"}', 
+             '{Locked="]({3})"}'] }, "By continuing with {0} Copilot, you agree to {1}'s [Terms]({2}) 
+             and [Privacy Statement]({3})", product.defaultChatAgent?.provider?.default?.name ?? '', 
+             product.defaultChatAgent?.provider?.default?.name ?? '', 
+             product.defaultChatAgent?.termsStatementUrl ?? '', 
+             product.defaultChatAgent?.privacyStatementUrl ?? ''), { isTrusted: true })));
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\scm\brow
+             ser\scm.contribution.ts
+LineNumber : 722
+Line       : 		const command = product.defaultChatAgent?.resolveMergeConflictsCommand;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\scm\brow
+             ser\scmInput.ts
+LineNumber : 132
+Line       : 					? product.defaultChatAgent?.generateCommitMessageCommand ?? action.id
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\scm\brow
+             ser\scmInput.ts
+LineNumber : 866
+Line       : 		const command = product.defaultChatAgent?.generateCommitMessageCommand;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\br
+             owser\abstractTaskService.ts
+LineNumber : 3260
+Line       : 			} else if (!taskGlobsInList && (task.configurationProperties.group as 
+             TaskGroup).isDefault === true) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\br
+             owser\abstractTaskService.ts
+LineNumber : 3389
+Line       : 								return (currentTaskGroup._id === taskGroupId && 
+             glob.match(currentTaskGroup.isDefault, relativePath, { ignoreCase: true }));
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\br
+             owser\abstractTaskService.ts
+LineNumber : 3813
+Line       : 								this.customize(task, { group: { kind: 'build', isDefault: true } }, 
+             true).then(() => {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\br
+             owser\abstractTaskService.ts
+LineNumber : 3832
+Line       : 								this.customize(task, { group: { kind: 'build', isDefault: true } }, 
+             true).then(() => {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\br
+             owser\abstractTaskService.ts
+LineNumber : 3882
+Line       : 								this.customize(task, { group: { kind: 'test', isDefault: true } }, true).then(() 
+             => {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\co
+             mmon\jsonSchema_v2.ts
+LineNumber : 254
+Line       : 			body: { kind: 'build', isDefault: true },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\tasks\co
+             mmon\jsonSchema_v2.ts
+LineNumber : 258
+Line       : 			body: { kind: 'test', isDefault: true },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\terminal
+             \browser\terminal.contribution.ts
+LineNumber : 115
+Line       : }, ViewContainerLocation.Panel, { doNotRegisterOpenCommand: true, isDefault: true });
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\terminal
+             \browser\terminalMenus.ts
+LineNumber : 901
+Line       : 	dropdownActions.push(disposableStore.add(new Action(TerminalCommandId.NewWithProfile, 
+             isDefault ? localize('defaultTerminalProfile', "{0} (Default)", sanitizedProfileName) : 
+             sanitizedProfileName, undefined, true, async () => {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\terminal
+             \browser\terminalMenus.ts
+LineNumber : 904
+Line       : 	submenuActions.push(disposableStore.add(new Action(TerminalCommandId.Split, isDefault ? 
+             localize('defaultTerminalProfile', "{0} (Default)", sanitizedProfileName) : 
+             sanitizedProfileName, undefined, true, async () => {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeA
+             gentSessions\browser\agentSessionsWelcome.ts
+LineNumber : 699
+Line       : 		const providers = this.productService.defaultChatAgent?.provider;
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeA
+             gentSessions\browser\agentSessionsWelcome.ts
+LineNumber : 700
+Line       : 		if (!providers || !providers.default || 
+             !this.productService.defaultChatAgent?.termsStatementUrl || 
+             !this.productService.defaultChatAgent?.privacyStatementUrl) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeA
+             gentSessions\browser\agentSessionsWelcome.ts
+LineNumber : 729
+Line       : 				this.productService.defaultChatAgent.termsStatementUrl,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeA
+             gentSessions\browser\agentSessionsWelcome.ts
+LineNumber : 730
+Line       : 				this.productService.defaultChatAgent.privacyStatementUrl
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 23
+Line       : 	documentationUrl: product.defaultChatAgent?.documentationUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 24
+Line       : 	manageSettingsUrl: product.defaultChatAgent?.manageSettingsUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 25
+Line       : 	provider: product.defaultChatAgent?.provider ?? { default: { name: '' } },
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 26
+Line       : 	publicCodeMatchesUrl: product.defaultChatAgent?.publicCodeMatchesUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 27
+Line       : 	termsStatementUrl: product.defaultChatAgent?.termsStatementUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\contrib\welcomeG
+             ettingStarted\common\gettingStartedContent.ts
+LineNumber : 28
+Line       : 	privacyStatementUrl: product.defaultChatAgent?.privacyStatementUrl ?? ''
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 15
+Line       : import { IDefaultChatAgent } from '../../../../base/common/product.js';
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 88
+Line       : function toDefaultAccountConfig(defaultChatAgent: IDefaultChatAgent): 
+             IDefaultAccountConfig {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 91
+Line       : 			defaultChatAgent.chatExtensionId,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 92
+Line       : 			defaultChatAgent.extensionId,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 96
+Line       : 				id: defaultChatAgent.provider.default.id,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 97
+Line       : 				name: defaultChatAgent.provider.default.name,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 100
+Line       : 				id: defaultChatAgent.provider.enterprise.id,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 101
+Line       : 				name: defaultChatAgent.provider.enterprise.name,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 103
+Line       : 			enterpriseProviderConfig: 
+             `${defaultChatAgent.completionsAdvancedSetting}.authProvider`,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 104
+Line       : 			enterpriseProviderUriSetting: defaultChatAgent.providerUriSetting,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 105
+Line       : 			scopes: defaultChatAgent.providerScopes,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 107
+Line       : 		entitlementUrl: defaultChatAgent.entitlementUrl,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 108
+Line       : 		tokenEntitlementUrl: defaultChatAgent.tokenEntitlementUrl,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 109
+Line       : 		mcpRegistryDataUrl: defaultChatAgent.mcpRegistryDataUrl,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 138
+Line       : 		this.defaultAccountConfig = toDefaultAccountConfig(productService.defaultChatAgent);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\account
+             s\browser\defaultAccount.ts
+LineNumber : 914
+Line       : 		const defaultAccountProvider = 
+             this._register(instantiationService.createInstance(DefaultAccountProvider, 
+             toDefaultAccountConfig(productService.defaultChatAgent)));
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 208
+Line       : const defaultChatAgent = {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 209
+Line       : 	upgradePlanUrl: product.defaultChatAgent?.upgradePlanUrl ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 210
+Line       : 	providerUriSetting: product.defaultChatAgent?.providerUriSetting ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 211
+Line       : 	entitlementSignupLimitedUrl: product.defaultChatAgent?.entitlementSignupLimitedUrl ?? 
+             '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 212
+Line       : 	chatQuotaExceededContext: product.defaultChatAgent?.chatQuotaExceededContext ?? '',
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 213
+Line       : 	completionsQuotaExceededContext: 
+             product.defaultChatAgent?.completionsQuotaExceededContext ?? ''
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 326
+Line       : 		if (!productService.defaultChatAgent) {
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 401
+Line       : 		chatQuotaExceeded: defaultChatAgent.chatQuotaExceededContext,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 402
+Line       : 		completionsQuotaExceeded: defaultChatAgent.completionsQuotaExceededContext,
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 846
+Line       : 		const response = await this.request(defaultChatAgent.entitlementSignupLimitedUrl, 
+             'POST', body, sessions, CancellationToken.None);
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\chat\co
+             mmon\chatEntitlementService.ts
+LineNumber : 943
+Line       : 						run: () => this.openerService.open(URI.parse(defaultChatAgent.upgradePlanUrl))
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\extensi
+             onManagement\browser\extensionEnablementService.ts
+LineNumber : 102
+Line       : 		this._completionsExtensionId = 
+             productService.defaultChatAgent?.extensionId.toLowerCase();
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\extensi
+             onManagement\browser\extensionEnablementService.ts
+LineNumber : 103
+Line       : 		this._chatExtensionId = productService.defaultChatAgent?.chatExtensionId.toLowerCase();
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\inlineC
+             ompletions\common\inlineCompletionsUnification.ts
+LineNumber : 72
+Line       : 		this._completionsExtensionId = 
+             productService.defaultChatAgent?.extensionId.toLowerCase();
+
+Path       : C:\Users\Shreyash\.gemini\antigravity\scratch\orion-IDE\src\vs\workbench\services\inlineC
+             ompletions\common\inlineCompletionsUnification.ts
+LineNumber : 73
+Line       : 		this._chatExtensionId = productService.defaultChatAgent?.chatExtensionId.toLowerCase();
+
+
+

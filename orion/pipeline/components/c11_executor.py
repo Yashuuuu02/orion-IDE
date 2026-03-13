@@ -1,6 +1,8 @@
 import asyncio
+import asyncio.subprocess
 import json
 import logging
+from typing import Any
 from pathlib import Path
 from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
@@ -16,108 +18,187 @@ class AtomicExecutor(BaseComponent):
 
     def __init__(self):
         super().__init__()
-        self._redis = None  # Can be injected for testing
+        self._redis = None
 
     async def _run(self, ctx: PipelineContext) -> PipelineContext:
         if ctx.cancelled:
             return ctx
 
-        # Get workspace root
         workspace_root = self._get_workspace_root(ctx)
         if not workspace_root:
             ctx.error = "No workspace_root available for file writes"
             return ctx
 
-        # Get file changes
         file_changes = self._get_file_changes(ctx)
         if not file_changes:
             logger.info("C11: No file changes to apply")
+            await self._ws_emit(ctx, "execution.complete", {
+                "files_written": 0,
+                "message": "No file changes to apply"
+            })
             return ctx
 
-        # Fast Mode: create git diff snapshot before writing
         if ctx.mode == RunMode.FAST:
             await self._create_fast_snapshot(ctx, workspace_root)
 
-        # Apply file changes
         files_written = 0
+        total = len(file_changes)
+
+        # Emit start event so UI can show progress bar
+        await self._ws_emit(ctx, "execution.started", {
+            "total_files": total,
+            "workspace_root": workspace_root
+        })
+
         try:
-            for fc in file_changes:
+            for i, fc in enumerate(file_changes):
+                if ctx.cancelled:
+                    break
+
                 file_path = fc.get("file_path", "") if isinstance(fc, dict) else getattr(fc, "file_path", "")
-                operation = fc.get("operation", "") if isinstance(fc, dict) else getattr(fc, "operation", "")
+                operation = fc.get("operation", "create") if isinstance(fc, dict) else getattr(fc, "operation", "create")
                 content = fc.get("content", "") if isinstance(fc, dict) else getattr(fc, "content", "")
 
                 target = Path(workspace_root) / file_path
+                lines_before = 0
+                lines_after = 0
 
-                if operation == "create":
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(content or "", encoding="utf-8")
-                    files_written += 1
-                elif operation == "modify":
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(content or "", encoding="utf-8")
-                    files_written += 1
-                elif operation == "delete":
-                    if target.exists():
-                        target.unlink()
-                    files_written += 1
+                try:
+                    if operation == "create":
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_text(content or "", encoding="utf-8")
+                        lines_after = len((content or "").splitlines())
+                        files_written += 1
 
-            ctx.execution = {"files_written": files_written, "status": "completed"}
+                        await self._ws_emit(ctx, "file.created", {
+                            "file_path": file_path,
+                            "lines_added": lines_after,
+                            "lines_removed": 0,
+                            "index": i + 1,
+                            "total": total,
+                            "absolute_path": str(target),
+                        })
+
+                    elif operation == "modify":
+                        # Count lines before
+                        if target.exists():
+                            lines_before = len(target.read_text(encoding="utf-8").splitlines())
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_text(content or "", encoding="utf-8")
+                        lines_after = len((content or "").splitlines())
+                        files_written += 1
+
+                        await self._ws_emit(ctx, "file.modified", {
+                            "file_path": file_path,
+                            "lines_added": max(0, lines_after - lines_before),
+                            "lines_removed": max(0, lines_before - lines_after),
+                            "lines_before": lines_before,
+                            "lines_after": lines_after,
+                            "index": i + 1,
+                            "total": total,
+                            "absolute_path": str(target),
+                        })
+
+                    elif operation == "delete":
+                        if target.exists():
+                            lines_before = len(target.read_text(encoding="utf-8").splitlines())
+                            target.unlink()
+                        files_written += 1
+
+                        await self._ws_emit(ctx, "file.deleted", {
+                            "file_path": file_path,
+                            "lines_removed": lines_before,
+                            "lines_added": 0,
+                            "index": i + 1,
+                            "total": total,
+                            "absolute_path": str(target),
+                        })
+
+                    elif operation == "mkdir":
+                        target.mkdir(parents=True, exist_ok=True)
+                        files_written += 1
+
+                        await self._ws_emit(ctx, "folder.created", {
+                            "file_path": file_path,
+                            "index": i + 1,
+                            "total": total,
+                            "absolute_path": str(target),
+                        })
+
+                except Exception as file_err:
+                    logger.error(f"C11: Failed on {file_path}: {file_err}")
+                    await self._ws_emit(ctx, "file.error", {
+                        "file_path": file_path,
+                        "error": str(file_err),
+                        "index": i + 1,
+                        "total": total,
+                    })
+
+            ctx.execution = {
+                "files_written": files_written,
+                "total": total,
+                "status": "completed"
+            }
+
             await self._ws_emit(ctx, "execution.complete", {
                 "files_written": files_written,
+                "total": total,
             })
-            logger.info(f"C11: Applied {files_written} file changes")
+            logger.info(f"C11: Applied {files_written}/{total} file changes")
 
         except Exception as e:
-            logger.error(f"C11: File write failed: {e}")
+            logger.error(f"C11: Execution failed: {e}")
             ctx.error = f"Atomic execution failed: {e}"
-            if ctx.mode == RunMode.PLANNING and ctx.checkpoint_id:
-                ctx.error = f"Execution failed, rollback needed: {e}"
 
         return ctx
 
     def _get_workspace_root(self, ctx: PipelineContext) -> str | None:
-        if ctx.stack_lock and ctx.stack_lock.workspace_root:
+        if ctx.stack_lock and hasattr(ctx.stack_lock, 'workspace_root') and ctx.stack_lock.workspace_root:
             return ctx.stack_lock.workspace_root
-        if ctx.workspace_id:
+        if ctx.workspace_id and ctx.workspace_id != "default":
             return ctx.workspace_id
         return None
 
     def _get_file_changes(self, ctx: PipelineContext) -> list:
         if ctx.merged and isinstance(ctx.merged, dict):
-            return ctx.merged.get("file_changes", [])
+            changes = ctx.merged.get("file_changes", [])
+            if changes:
+                return changes
         if ctx.agent_outputs:
             changes = []
             for output in ctx.agent_outputs:
-                for fc in output.file_changes:
-                    changes.append(fc)
-            return changes
+                if hasattr(output, 'file_changes'):
+                    for fc in getattr(output, 'file_changes', []):
+                        changes.append(fc)
+            if changes:
+                return changes
+        # Fallback: check task_dag for file plan
+        if ctx.task_dag and isinstance(ctx.task_dag, dict):
+            return ctx.task_dag.get("file_changes", [])
         return []
 
     def _get_redis(self):
-        """Use injected _redis if available, otherwise get_redis()."""
         if self._redis is not None:
             return self._redis
         return get_redis()
 
     async def _create_fast_snapshot(self, ctx: PipelineContext, workspace_root: str):
-        """Create git diff snapshot and store in Redis."""
         try:
             proc = await asyncio.create_subprocess_exec(
                 "git", "diff", "HEAD",
                 cwd=workspace_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,  # type: ignore[attr-defined]
+                stderr=asyncio.subprocess.PIPE,  # type: ignore[attr-defined]
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=10.0)
-            diff_output = (stdout or b"").decode("utf-8", errors="replace")
-
+            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=10.0)
+            diff_output: str = (stdout or b"").decode("utf-8", errors="replace")
             redis = self._get_redis()
             cache_key = f"fast_snapshot:{ctx.run_id}"
             if hasattr(redis, 'set'):
                 await redis.set(cache_key, diff_output, ex=7200)
             else:
                 await redis.setex(cache_key, 7200, diff_output)
-            logger.info(f"C11: Fast snapshot stored in Redis: {cache_key}")
+            logger.info(f"C11: Fast snapshot stored: {cache_key}")
         except Exception as e:
             logger.warning(f"C11: Failed to create fast snapshot: {e}")
 

@@ -1,8 +1,9 @@
-﻿import asyncio
+import asyncio
 import json
 import logging
 import sqlite3
 import os
+from typing import Any
 from pathlib import Path
 from fastapi import WebSocket
 from orion.core.redis_client import get_redis
@@ -15,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 class WebSocketSessionManager:
     def __init__(self):
-        self._active_connections: dict[str, WebSocket] = {}
+        self._active_connections: dict[str, Any] = {}
         self._approval_events: dict[str, asyncio.Event] = {}
-        self._approval_results: dict[str, dict] = {}
+        self._approval_results: dict[str, dict[str, Any]] = {}
 
         # SQLite path for memory
         self._memory_db_path = Path(os.path.expanduser(settings.SKILL_GLOBAL_PATH)).parent / "memories.db"
@@ -38,7 +39,7 @@ class WebSocketSessionManager:
             logger.info(f"Replaying {len(buffered)} events for reconnecting session {session_id}")
             # we want oldest first for replay usually, but Redis lrange returns oldest first if lpush/rpush are used correctly
             # we assume rpush below, so index 0 is oldest.
-            for item in buffered:
+            for item in list(buffered):  # type: ignore[arg-type]
                 try:
                     await websocket.send_text(item)
                 except Exception as e:
@@ -46,7 +47,7 @@ class WebSocketSessionManager:
 
     def disconnect(self, session_id: str):
         if session_id in self._active_connections:
-            del self._active_connections[session_id]
+            self._active_connections.pop(session_id, None)
             logger.info(f"Session {session_id} disconnected. Pipeline running headless if active.")
 
     async def emit(self, session_id: str, event: dict):
@@ -85,10 +86,9 @@ class WebSocketSessionManager:
         msg_type = message.get("type")
 
         if msg_type == "run_pipeline":
-            # NO_PROVIDER_CONFIGURED gate
             mgr = getattr(self, "_llm_manager", llm_manager)
-            if not settings.MOCK_LLM and not mgr.is_configured():
-                err = {
+            if not settings.MOCK_LLM and mgr is not None and not mgr.is_configured():
+                err: dict[str, str] = {
                     "type": "error",
                     "code": "NO_PROVIDER_CONFIGURED",
                     "action": "open_settings"
@@ -97,19 +97,58 @@ class WebSocketSessionManager:
                 return
 
             run_mode = self._resolve_mode(message)
+            raw_prompt = message.get("prompt", "").strip()
+            workspace_id = message.get("workspace_id", "default")
 
-            # Pipeline starting logic would go here
-            logger.info(f"Pipeline started for {session_id} in mode {run_mode}")
+            if not raw_prompt:
+                await self.emit(session_id, {
+                    "type": "error",
+                    "code": "EMPTY_PROMPT"
+                })
+                return
+
+            from orion.pipeline.context import PipelineContext
+            from orion.pipeline.runner import PipelineRunner
+            from orion.schemas.settings import RunConfig
+
+            ctx = PipelineContext.create(
+                session_id=session_id,
+                workspace_id=workspace_id,
+                raw_prompt=raw_prompt,
+                mode=run_mode,
+                run_config=RunConfig()
+            )
+
+            async def ws_emit(ctx, event_type: str, payload: dict):
+                await self.emit(session_id, {
+                    "type": event_type,
+                    "run_id": ctx.run_id,
+                    **payload
+                })
+
+            await self.emit(session_id, {
+                "type": "pipeline.started",
+                "run_id": ctx.run_id,
+                "mode": run_mode.value
+            })
+
+            runner = PipelineRunner()
+            asyncio.create_task(runner.run(ctx, ws_emit))
+            logger.info(f"Pipeline task created for session={session_id} run_id={ctx.run_id} mode={run_mode}")
 
         elif msg_type == "cancel_run":
             run_id = message.get("run_id")
             # In real system, we'd lookup the ctx and set ctx.cancelled = True
             logger.info(f"Cancel run requested for {run_id}")
 
-        elif msg_type in ["approve_iisg", "approve_cost_cap", "dismiss_skill_warning"]:
-            run_id = message.get("run_id")
-            decision = message.get("decision", {})
-            self.resolve_approval(session_id, run_id, decision)
+        elif msg_type in ["approve_iisg", "approve_cost_cap", "dismiss_skill_warning",
+                      "approve_plan", "reject_plan"]:
+            run_id = str(message.get("run_id", ""))
+            approved = msg_type in ["approve_iisg", "approve_cost_cap", "approve_plan"]
+            decision = message.get("decision", {"approved": approved})
+            if isinstance(decision, dict) and "approved" not in decision:
+                decision["approved"] = approved
+            self.resolve_approval(session_id, run_id, decision if isinstance(decision, dict) else {"approved": approved})
 
         elif msg_type == "update_settings":
             providers_data = message.get("providers", [])
