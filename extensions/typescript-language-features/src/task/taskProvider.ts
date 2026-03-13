@@ -6,7 +6,6 @@
 import * as jsonc from 'jsonc-parser';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { wait } from '../test/testUtils';
 import { ITypeScriptServiceClient, ServerResponse } from '../typescriptService';
 import { coalesce } from '../utils/arrays';
 import { readUnifiedConfig } from '../utils/configuration';
@@ -293,6 +292,10 @@ class TscTaskProvider extends Disposable implements vscode.TaskProvider {
 		const type = readUnifiedConfig<AutoDetect | undefined>('tsc.autoDetect', undefined, { fallbackSection: 'typescript' });
 		this.autoDetect = typeof type === 'undefined' ? AutoDetect.on : type;
 	}
+}
+
+function wait(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function register(
