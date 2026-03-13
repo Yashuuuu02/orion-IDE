@@ -18,8 +18,6 @@ import { ThemeIcon } from '../../../base/common/themables.js';
 import { registerIcon } from '../../../platform/theme/common/iconRegistry.js';
 import { IMenu, IMenuService, MenuId } from '../../../platform/actions/common/actions.js';
 import { Action, IAction, Separator, SubmenuAction, toAction } from '../../../base/common/actions.js';
-// eslint-disable-next-line
-import { ipcRenderer } from '../../../base/parts/sandbox/electron-browser/globals.js'; // [FORK]
 import { addDisposableListener, EventType, append, clearNode, hide, show, EventHelper, $, runWhenWindowIdle, getWindow } from '../../../base/browser/dom.js';
 import { StandardKeyboardEvent } from '../../../base/browser/keyboardEvent.js';
 import { StandardMouseEvent } from '../../../base/browser/mouseEvent.js';
@@ -56,8 +54,6 @@ export class GlobalCompositeBar extends Disposable {
 
 	private readonly globalActivityAction = this._register(new Action(GLOBAL_ACTIVITY_ID));
 	private readonly accountAction = this._register(new Action(ACCOUNTS_ACTIVITY_ID));
-	// [FORK] Add Agent Manager action to the bottom bar
-	private readonly agentManagerAction = this._register(new Action('workbench.action.agentManager'));
 	private readonly globalActivityActionBar: ActionBar;
 
 	constructor(
@@ -99,18 +95,6 @@ export class GlobalCompositeBar extends Disposable {
 						});
 				}
 
-				// [FORK] ViewItem for the Agent Manager action
-				if (action.id === 'workbench.action.agentManager') {
-					return this.instantiationService.createInstance(AgentManagerActivityActionViewItem,
-						this.contextMenuActionsProvider,
-						{
-							...options,
-							colors: this.colors,
-							hoverOptions: this.activityHoverOptions
-						},
-						contextMenuAlignmentOptions
-					);
-				}
 
 				throw new Error(`No view item for action '${action.id}'`);
 			},
@@ -123,8 +107,6 @@ export class GlobalCompositeBar extends Disposable {
 			this.globalActivityActionBar.push(this.accountAction, { index: GlobalCompositeBar.ACCOUNTS_ACTION_INDEX });
 		}
 
-		// [FORK] Always push the Agent Manager icon
-		this.globalActivityActionBar.push(this.agentManagerAction);
 
 		this.globalActivityActionBar.push(this.globalActivityAction);
 
@@ -600,47 +582,6 @@ export class AccountsActivityActionViewItem extends AbstractGlobalActivityAction
 	//#endregion
 }
 
-// [FORK] ActionViewItem for the Agent Manager
-export class AgentManagerActivityActionViewItem extends AbstractGlobalActivityActionViewItem {
-	constructor(
-		contextMenuActionsProvider: () => IAction[],
-		options: ICompositeBarActionViewItemOptions,
-		contextMenuAlignmentOptions: () => Readonly<{ anchorAlignment: AnchorAlignment; anchorAxisAlignment: AnchorAxisAlignment }> | undefined,
-		@IThemeService themeService: IThemeService,
-		@IHoverService hoverService: IHoverService,
-		@IMenuService menuService: IMenuService,
-		@IContextMenuService contextMenuService: IContextMenuService,
-		@IContextKeyService contextKeyService: IContextKeyService,
-		@IConfigurationService configurationService: IConfigurationService,
-		@IKeybindingService keybindingService: IKeybindingService,
-		@IInstantiationService instantiationService: IInstantiationService,
-		@IActivityService activityService: IActivityService,
-	) {
-		const action = instantiationService.createInstance(CompositeBarAction, {
-			id: 'workbench.action.agentManager',
-			name: 'Agent Manager',
-			// Use our own CSS class that targets the custom SVG we styled in activitybarpart.css
-			classNames: ['agent-manager-icon']
-		});
-		super(MenuId.GlobalActivity, action, options, contextMenuActionsProvider, contextMenuAlignmentOptions, themeService, hoverService, menuService, contextMenuService, contextKeyService, configurationService, keybindingService, activityService);
-		this._register(action);
-	}
-
-	override render(container: HTMLElement): void {
-		super.render(container);
-
-		if (this.container) {
-			// Override default click handler to send IPC message to open the Agent Window
-			this._register(addDisposableListener(this.container, EventType.MOUSE_DOWN, async (e: MouseEvent) => {
-				EventHelper.stop(e, true);
-				const isLeftClick = e?.button !== 2;
-				if (isLeftClick) {
-					ipcRenderer.invoke('vscode:openAgentManager');
-				}
-			}));
-		}
-	}
-}
 
 export class GlobalActivityActionViewItem extends AbstractGlobalActivityActionViewItem {
 

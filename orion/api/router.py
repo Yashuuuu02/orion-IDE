@@ -6,9 +6,11 @@ from orion.api.settings import router as settings_router
 from orion.api.memory import router as memory_router
 from orion.api.search import router as search_router
 from orion.api.metrics_endpoint import router as metrics_router
+from orion.api.chat import router as chat_router
 
 api_router = APIRouter()
 api_router.include_router(metrics_router)
+api_router.include_router(chat_router)
 
 # Health doesn't go under /api/v1 prefix based on requirements
 # It will be included directly in main.py

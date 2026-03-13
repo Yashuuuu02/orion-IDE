@@ -63,8 +63,9 @@ div.chat-welcome-view {
 	}
 
 	& > .chat-welcome-view-icon.custom-icon {
-		mask-size: 40px;
-		-webkit-mask-size: 40px;
+		background-size: 40px;
+		width: 40px;
+		height: 40px;
 	}
 
 	& > .chat-welcome-view-icon.large-icon {
@@ -79,8 +80,7 @@ div.chat-welcome-view {
 	}
 
 	& > .chat-welcome-view-icon.large-icon.custom-icon {
-		mask-size: 72px !important;
-		-webkit-mask-size: 72px !important;
+		background-size: 72px !important;
 		width: 72px;
 		height: 72px;
 	}

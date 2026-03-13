@@ -6,7 +6,6 @@ import os
 from typing import Any
 from pathlib import Path
 from fastapi import WebSocket
-from orion.core.redis_client import get_redis
 from orion.llm.manager import llm_manager
 from orion.schemas.settings import ProviderConfig
 from orion.schemas.pipeline import RunMode
@@ -30,18 +29,29 @@ class WebSocketSessionManager:
         await websocket.accept()
         self._active_connections[session_id] = websocket
 
-        redis = get_redis()
-        # Replay buffered events (max 50)
-        buffer_key = f"ws_session:{session_id}:events"
-        buffered = await redis.lrange(buffer_key, 0, 49)
+        from orion.core.database import AsyncSessionLocal
+        from sqlalchemy import text
+        
+        buffered = []
+        async with AsyncSessionLocal() as db:
+            await db.execute(text(
+                "UPDATE orion_sessions "
+                "SET ws_status='active', ws_connected_at=NOW(), ws_last_seen=NOW() "
+                "WHERE id=:sid"
+            ), {'sid': session_id})
+            await db.commit()
+            
+            result = await db.execute(text(
+                "SELECT event_json FROM ws_event_buffer "
+                "WHERE session_id=:sid ORDER BY created_at ASC"
+            ), {'sid': session_id})
+            buffered = [row[0] for row in result.fetchall()]
 
         if buffered:
             logger.info(f"Replaying {len(buffered)} events for reconnecting session {session_id}")
-            # we want oldest first for replay usually, but Redis lrange returns oldest first if lpush/rpush are used correctly
-            # we assume rpush below, so index 0 is oldest.
-            for item in list(buffered):  # type: ignore[arg-type]
+            for item in buffered:
                 try:
-                    await websocket.send_text(item)
+                    await websocket.send_text(json.dumps(item) if isinstance(item, dict) else item)
                 except Exception as e:
                     logger.error(f"Failed to replay event: {e}")
 
@@ -53,12 +63,20 @@ class WebSocketSessionManager:
     async def emit(self, session_id: str, event: dict):
         event_str = json.dumps(event)
 
-        # Always buffer to Redis
-        redis = get_redis()
-        buffer_key = f"ws_session:{session_id}:events"
-        await redis.rpush(buffer_key, event_str)
-        await redis.ltrim(buffer_key, -50, -1)  # keep only last 50
-        await redis.expire(buffer_key, 7200)    # TTL 2h
+        from orion.core.database import AsyncSessionLocal
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as db:
+            await db.execute(text(
+                "INSERT INTO ws_event_buffer(session_id, run_id, event_json) VALUES (:sid, :rid, :evt::jsonb)"
+            ), {'sid': session_id, 'rid': event.get('run_id'), 'evt': event_str})
+            
+            await db.execute(text(
+                "DELETE FROM ws_event_buffer WHERE id IN ("
+                "  SELECT id FROM ws_event_buffer "
+                "  WHERE session_id=:sid ORDER BY created_at DESC OFFSET 50"
+                ")"
+            ), {'sid': session_id})
+            await db.commit()
 
         # Send to connected client if present
         if session_id in self._active_connections:
@@ -158,13 +176,19 @@ class WebSocketSessionManager:
 
         elif msg_type == "set_tab_state":
             state = message.get("state", {})
-            redis = get_redis()
-            await redis.hset(f"ws_session:{session_id}", mapping={"tab_state": json.dumps(state)})
+            from orion.core.database import AsyncSessionLocal
+            from sqlalchemy import text
+            async with AsyncSessionLocal() as db:
+                await db.execute(text("UPDATE orion_sessions SET tab_state=:state::jsonb WHERE id=:sid"), {'state': json.dumps(state), 'sid': session_id})
+                await db.commit()
 
         elif msg_type == "update_permissions":
             perms = message.get("permissions", {})
-            redis = get_redis()
-            await redis.hset(f"ws_session:{session_id}", mapping={"permissions": json.dumps(perms)})
+            from orion.core.database import AsyncSessionLocal
+            from sqlalchemy import text
+            async with AsyncSessionLocal() as db:
+                await db.execute(text("UPDATE orion_sessions SET permissions=:perms::jsonb WHERE id=:sid"), {'perms': json.dumps(perms), 'sid': session_id})
+                await db.commit()
 
         elif msg_type == "add_memory":
             content = message.get("content")

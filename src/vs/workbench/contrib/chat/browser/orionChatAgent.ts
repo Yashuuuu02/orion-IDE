@@ -12,8 +12,9 @@ import { IChatProgress } from '../common/chatService/chatService.js';
 import { ChatAgentLocation, ChatModeKind } from '../common/constants.js';
 
 const ORION_AGENT_ID = 'orion.agent';
-const ORION_BACKEND = 'http://localhost:8321';
-const ORION_WS = 'ws://localhost:8321';
+const ORION_BACKEND = 'http://127.0.0.1:8321';
+const ORION_WS = 'ws://127.0.0.1:8321';
+
 
 /** Tracks pending plan run_id for proceed/cancel */
 let activePlanRunId: string | null = null;

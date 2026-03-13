@@ -1,7 +1,7 @@
-from fastapi import APIRouter
-from orion.core.redis_client import get_redis
 from orion.llm.manager import llm_manager
 from orion.core.config import settings
+
+from fastapi import APIRouter
 
 router = APIRouter()
 
@@ -20,14 +20,7 @@ async def health_detailed():
     except Exception:
         status["db"] = False
 
-    # Check Redis
-    try:
-        redis = get_redis()
-        if redis:
-            await redis.ping()
-            status["redis"] = True
-    except Exception:
-        status["redis"] = False
+
 
     # Check LLM
     try:

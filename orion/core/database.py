@@ -6,6 +6,8 @@ db_url = settings.DATABASE_URL
 
 engine = create_async_engine(db_url, echo=False)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+AsyncSessionLocal = async_session_maker  # alias used by pipeline components
+
 
 async def get_db():
     async with async_session_maker() as session:

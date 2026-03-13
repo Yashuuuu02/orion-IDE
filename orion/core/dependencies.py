@@ -1,6 +1,6 @@
 from fastapi import Header, HTTPException
 from orion.core.database import async_session_maker
-from orion.core.redis_client import get_redis
+
 
 async def require_session_id(
     x_orion_session_id: str = Header(None)
@@ -13,5 +13,4 @@ async def get_db():
     async with async_session_maker() as session:
         yield session
 
-async def get_redis_dep():
-    return get_redis()
+

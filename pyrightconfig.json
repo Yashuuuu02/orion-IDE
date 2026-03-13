@@ -1,10 +1,8 @@
 {
   "include": ["orion"],
-  "extraPaths": [
-    ".",
-    "c:\\Users\\Shreyash\\.gemini\\antigravity\\scratch\\orion-IDE"
-  ],
+  "extraPaths": ["."],
   "pythonVersion": "3.11",
   "typeCheckingMode": "off",
-  "pythonPlatform": "Windows"
+  "venvPath": ".",
+  "venv": ".venv"
 }

@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 import os
 
+from orion.core.config import settings
 config = context.config
+
 
 if config.config_file_name is not None:
     try:
@@ -17,7 +19,8 @@ if config.config_file_name is not None:
 target_metadata = None
 
 def run_migrations_offline() -> None:
-    url = os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
+    url = settings.DATABASE_URL
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -33,7 +36,8 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 async def run_async_migrations() -> None:
-    url = os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
+    url = settings.DATABASE_URL
+
     configuration = config.get_section(config.config_ini_section, {})
     configuration["sqlalchemy.url"] = url
     connectable = async_engine_from_config(

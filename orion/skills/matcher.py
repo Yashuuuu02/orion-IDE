@@ -4,9 +4,12 @@ import math
 from orion.schemas.skills import SkillRecord, SkillMatch
 from orion.pipeline.context import PipelineContext
 from orion.core.config import SKILL_MATCH_THRESHOLD, TOP_K_SKILLS, EMBEDDING_MODEL
-from orion.core.redis_client import get_redis
 from orion.llm.manager import llm_manager
+from orion.core.database import AsyncSessionLocal
+from sqlalchemy import text
+from datetime import datetime, timezone, timedelta
 
+import typing
 logger = logging.getLogger(__name__)
 
 
@@ -36,28 +39,40 @@ class SkillMatcher:
         # 1. Embed prompt
         prompt_emb = await llm_manager.get_embedding(prompt)
 
-        # 2. Score each enabled skill
         candidates: list[SkillMatch] = []
-        redis = get_redis()
 
+        # 2. Score each enabled skill
         for skill in skills:
             if not skill.enabled:
                 continue
 
             # Cache key for skill embedding
-            desc_hash = hashlib.sha256(skill.description.encode()).hexdigest()[:8]
-            cache_key = f"skill_emb:{EMBEDDING_MODEL}:{skill.skill_id}:{desc_hash}"
+            desc_hash = hashlib.sha256(str(skill.description).encode()).hexdigest()
+            
+            async with AsyncSessionLocal() as db:
+                result = await db.execute(text(
+                    "SELECT embedding FROM embedding_cache WHERE content_hash=:h AND model=:m AND (expires_at IS NULL OR expires_at > NOW())"
+                ), {'h': desc_hash, 'm': EMBEDDING_MODEL})
+                row = result.fetchone()
+                
+                if row:
+                    skill_emb = row[0]
+                else:
+                    skill_emb = await llm_manager.get_embedding(skill.description)
+                    expires = datetime.now(timezone.utc) + timedelta(days=7)
+                    await db.execute(text(
+                        "INSERT INTO embedding_cache(content_hash, model, embedding, expires_at) VALUES (:h, :m, :emb, :exp) ON CONFLICT (content_hash, model) DO UPDATE SET embedding=EXCLUDED.embedding, expires_at=EXCLUDED.expires_at"
+                    ), {'h': desc_hash, 'm': EMBEDDING_MODEL, 'emb': str(skill_emb), 'exp': expires})
+                    await db.commit()
 
-            cached_emb = await redis.get(cache_key)
-            if cached_emb:
-                import json
-                skill_emb = json.loads(cached_emb)
-            else:
-                skill_emb = await llm_manager.get_embedding(skill.description)
-                import json
-                await redis.setex(cache_key, 7 * 24 * 3600, json.dumps(skill_emb))
+            import json
+            if isinstance(skill_emb, str):
+                try:
+                    skill_emb = json.loads(skill_emb)
+                except Exception:
+                    pass
 
-            score = _cosine_similarity(prompt_emb, skill_emb)
+            score = _cosine_similarity(prompt_emb, typing.cast(list[float], skill_emb))
 
             if score > self.THRESHOLD:
                 candidates.append(SkillMatch(
@@ -71,4 +86,4 @@ class SkillMatcher:
         candidates.sort(key=lambda c: c.score, reverse=True)
 
         # 4. Return top-K
-        return candidates[:self.TOP_K]
+        return candidates[:int(self.TOP_K)]

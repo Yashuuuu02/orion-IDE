@@ -1,5 +1,7 @@
 {
-    "python.defaultInterpreterPath": "C:\\Users\\Shreyash\\.gemini\\antigravity\\scratch\\orion-IDE\\.venv\\Scripts\\python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
     "python.analysis.extraPaths": ["."],
-    "pyre2.typeCheckingMode": "off"
+    "python.analysis.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "pyre2.typeCheckingMode": "off",
+    "python.analysis.include": ["orion"]
 }

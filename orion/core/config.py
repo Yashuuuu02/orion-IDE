@@ -17,7 +17,7 @@ SEED_SUPPORTED_PROVIDERS: frozenset = frozenset({"openai", "groq", "nvidia_nim"}
 class Settings(BaseSettings):
     ORION_ENV: str = "local"
     DATABASE_URL: str
-    REDIS_URL: str
+    REDIS_URL: str = ""
     WS_PORT: int = 8000
     MOCK_LLM: bool = False
     SKILL_GLOBAL_PATH: str = "~/.orion/skills"
@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     MAX_CONCURRENT_RUNS: int = 3
     SESSION_BUDGET_USD: float = 5.0
     DAILY_BUDGET_USD: float = 50.0
+    MONTHLY_BUDGET_USD: float = 500.0
+    OPENROUTER_API_KEY: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

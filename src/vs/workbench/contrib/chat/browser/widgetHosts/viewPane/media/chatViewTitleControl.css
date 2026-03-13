@@ -8,6 +8,8 @@
 	.chat-view-title-container {
 		display: none;
 		cursor: pointer;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		padding-bottom: 4px;
 
 		.chat-view-title-inner {
 			display: flex;
@@ -43,6 +45,8 @@
 			white-space: nowrap;
 			text-overflow: ellipsis;
 			min-width: 0;
+			letter-spacing: 0.06em;
+			color: rgba(224, 48, 48, 0.75);
 		}
 
 		.chat-view-title-actions-toolbar {

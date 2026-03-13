@@ -25,6 +25,17 @@ function code() {
 		CODE=".build/electron/$NAME"
 	fi
 
+	# Launch Backend (Port 8321)
+	echo "Stopping any existing backend on port 8321..."
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		lsof -ti:8321 | xargs kill -9 2>/dev/null || true
+	else
+		fuser -k 8321/tcp 2>/dev/null || true
+	fi
+
+	echo "Starting Orion backend..."
+	(cd "$ROOT" && .venv-mac/bin/uvicorn orion.main:app --host 0.0.0.0 --port 8321 --reload > /tmp/orion-backend.log 2>&1 &)
+
 	# Get electron, compile, built-in extensions
 	if [[ -z "${VSCODE_SKIP_PRELAUNCH}" ]]; then
 		node build/lib/preLaunch.ts

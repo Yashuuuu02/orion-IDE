@@ -1,7 +1,6 @@
 import asyncio
 from fastapi import APIRouter
 from pydantic import BaseModel
-from orion.core.redis_client import get_redis
 from orion.schemas.pipeline import RunMode
 from orion.schemas.settings import RunConfig
 
@@ -60,11 +59,13 @@ async def rollback_pipeline(req: RollbackRequest):
 @router.get("/pipeline/status/{run_id}")
 async def pipeline_status(run_id: str):
     try:
-        redis = get_redis()
-        # Stub logic matching requirements
-        status_data = await redis.hget(f"pipeline:{run_id}", "status")
-        if status_data:
-            return {"status": status_data}
+        from orion.core.database import AsyncSessionLocal
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(text("SELECT status FROM pipeline_runs WHERE run_id=:rid"), {'rid': run_id})
+            row = result.fetchone()
+            if row:
+                return {"status": row[0]}
     except Exception:
         pass
 

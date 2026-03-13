@@ -298,6 +298,9 @@ import './contrib/externalUriOpener/common/externalUriOpener.contribution.js';
 import './contrib/extensions/browser/extensions.contribution.js';
 import './contrib/extensions/browser/extensionsViewlet.js';
 
+// Agent Manager
+import './contrib/agent/browser/agentManager.contribution.js';
+
 // Output View
 import './contrib/output/browser/output.contribution.js';
 import './contrib/output/browser/outputView.js';

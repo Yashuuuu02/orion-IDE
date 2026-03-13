@@ -167,9 +167,10 @@ export class ChatViewWelcomePart extends Disposable {
 					const iconClass = `.chat-welcome-view-icon.${iconId}`;
 
 					createCSSRule(iconClass, `
-					mask: ${cssUrl} no-repeat 50% 50%;
-					-webkit-mask: ${cssUrl} no-repeat 50% 50%;
-					background-color: var(--vscode-icon-foreground);
+					background-image: ${cssUrl};
+					background-repeat: no-repeat;
+					background-position: 50% 50%;
+					background-size: contain;
 				`);
 					icon.classList.add(iconId, 'custom-icon');
 				}

@@ -5,7 +5,6 @@ from tree_sitter import Language, Parser
 from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
 from orion.schemas.stack import StackLock
-from orion.core.redis_client import get_redis
 from orion.core.config import settings
 import time
 
@@ -19,17 +18,7 @@ class StackResolver(BaseComponent):
         if ctx.cancelled:
             return ctx
 
-        redis = get_redis()
-        cache_key = f"stack_lock:{ctx.workspace_id}"
-
-        cached_data = await redis.get(cache_key)
-        if cached_data:
-            # We would normally check valid file hashes here, but for basic implementation we just load
-            data = json.loads(cached_data)
-            logger.info("C02: Restored StackLock from cache")
-            ctx.stack_lock = StackLock(**data["lock"])
-            return ctx
-
+        # Stacklock cache was removed as part of Redis dropout
         logger.info("C02: Analyzing stack")
 
         language = "unknown"
@@ -78,12 +67,6 @@ class StackResolver(BaseComponent):
         )
 
         ctx.stack_lock = stack_lock
-
-        cache_data = {
-            "lock": json.loads(stack_lock.model_dump_json()),
-            "file_hashes": {}
-        }
-        await redis.setex(cache_key, 24 * 3600, json.dumps(cache_data))
 
         return ctx
 

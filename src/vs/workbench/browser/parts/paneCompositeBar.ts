@@ -31,6 +31,8 @@ import { GestureEvent } from '../../../base/browser/touch.js';
 import { IPaneCompositePart } from './paneCompositePart.js';
 import { IConfigurationService } from '../../../platform/configuration/common/configuration.js';
 import { IViewsService } from '../../services/views/common/viewsService.js';
+// eslint-disable-next-line
+import { ipcRenderer } from '../../../base/parts/sandbox/electron-browser/globals.js'; // [FORK]
 
 interface IPlaceholderViewContainer {
 	readonly id: string;
@@ -827,6 +829,11 @@ class ViewContainerActivityAction extends CompositeBarAction {
 
 				return;
 			}
+		}
+
+		if (this.compositeBarActionItem.id === 'workbench.view.agentManager') {
+			ipcRenderer.invoke('vscode:openAgentManager');
+			return;
 		}
 
 		await this.paneCompositePart.openPaneComposite(this.compositeBarActionItem.id, focus);

@@ -7,7 +7,9 @@ from pathlib import Path
 from orion.pipeline.base_component import BaseComponent
 from orion.pipeline.context import PipelineContext
 from orion.schemas.pipeline import RunMode
-from orion.core.redis_client import get_redis
+from sqlalchemy import text
+from datetime import datetime, timezone, timedelta
+from orion.core.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +20,6 @@ class AtomicExecutor(BaseComponent):
 
     def __init__(self):
         super().__init__()
-        self._redis = None
 
     async def _run(self, ctx: PipelineContext) -> PipelineContext:
         if ctx.cancelled:
@@ -177,10 +178,7 @@ class AtomicExecutor(BaseComponent):
             return ctx.task_dag.get("file_changes", [])
         return []
 
-    def _get_redis(self):
-        if self._redis is not None:
-            return self._redis
-        return get_redis()
+
 
     async def _create_fast_snapshot(self, ctx: PipelineContext, workspace_root: str):
         try:
@@ -192,13 +190,15 @@ class AtomicExecutor(BaseComponent):
             )
             stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=10.0)
             diff_output: str = (stdout or b"").decode("utf-8", errors="replace")
-            redis = self._get_redis()
-            cache_key = f"fast_snapshot:{ctx.run_id}"
-            if hasattr(redis, 'set'):
-                await redis.set(cache_key, diff_output, ex=7200)
-            else:
-                await redis.setex(cache_key, 7200, diff_output)
-            logger.info(f"C11: Fast snapshot stored: {cache_key}")
+            
+            expires = datetime.now(timezone.utc) + timedelta(hours=2)
+            async with AsyncSessionLocal() as db:
+                await db.execute(text(
+                    "UPDATE pipeline_runs SET fast_result=:res, fast_result_expires_at=:exp WHERE run_id=:rid"
+                ), {'res': diff_output, 'exp': expires, 'rid': ctx.run_id})
+                await db.commit()
+            
+            logger.info(f"C11: Fast snapshot stored in DB for run: {ctx.run_id}")
         except Exception as e:
             logger.warning(f"C11: Failed to create fast snapshot: {e}")
 
