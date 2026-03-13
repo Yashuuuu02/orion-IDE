@@ -10,16 +10,17 @@ import { IWorkbenchContribution, registerWorkbenchContribution2, WorkbenchPhase 
 import { IChatAgentImplementation, IChatAgentRequest, IChatAgentResult, IChatAgentService, IChatAgentHistoryEntry } from '../common/participants/chatAgents.js';
 import { IChatProgress } from '../common/chatService/chatService.js';
 import { ChatAgentLocation, ChatModeKind } from '../common/constants.js';
+import { IWorkspaceContextService } from '../../../../platform/workspace/common/workspace.js';
+import { IMainProcessService } from '../../../../platform/ipc/common/mainProcessService.js';
 
 const ORION_AGENT_ID = 'orion.agent';
-const ORION_BACKEND = 'http://127.0.0.1:8321';
-const ORION_WS = 'ws://127.0.0.1:8321';
-
 
 /** Tracks pending plan run_id for proceed/cancel */
 let activePlanRunId: string | null = null;
 
 class OrionChatAgentImplementation implements IChatAgentImplementation {
+	constructor(private readonly mainProcessService: IMainProcessService) {}
+
 	async invoke(
 		request: IChatAgentRequest,
 		progress: (parts: IChatProgress[]) => void,
@@ -33,6 +34,19 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 
 		// Handle proceed/cancel for pending plan approvals
 		const promptLower = prompt.toLowerCase();
+
+		// Dynamically get the Backend port allocated by electron-main
+		let orionPort = '8321';
+		try {
+			const orionChannel = this.mainProcessService.getChannel('orion');
+			orionPort = await orionChannel.call<string>('getPort');
+		} catch (e) {
+			console.warn('Failed to fetch dynamic orion port from main process. Falling back to 8321.', e);
+		}
+		
+		const ORION_BACKEND = `http://127.0.0.1:${orionPort}`;
+		const ORION_WS = `ws://127.0.0.1:${orionPort}`;
+
 		if (promptLower === 'proceed' || promptLower === 'yes' || promptLower === 'go') {
 			const pendingRunId = activePlanRunId;
 			if (pendingRunId) {
@@ -89,8 +103,10 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 		}
 
 		const mode = request.command === 'plan' ? 'planning' : 'fast';
-		const sessionId = request.requestId ?? request.sessionResource?.toString() ?? 'vscode-session';
-		const workspaceId = 'default';
+		// Use sessionResource for a stable, per-conversation ID instead of the per-request requestId
+		const sessionId = request.sessionResource?.toString() ?? request.requestId ?? 'vscode-session';
+		// Dynamically resolve the workspace root via IWorkspaceContextService (injected in OrionChatAgentContribution)
+		const workspaceId = OrionChatAgentContribution.resolvedWorkspaceId ?? 'default';
 
 		// 1. Trigger pipeline via REST
 		let runId: string;
@@ -133,13 +149,16 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 			}
 
 			const cleanup = () => {
+				try { cancelListener.dispose(); } catch { /* ignore */ }
 				try { ws.close(); } catch { /* ignore */ }
 				resolve();
 			};
 
-			token.onCancellationRequested(() => {
+			const cancelListener = token.onCancellationRequested(() => {
 				try {
-					ws.send(JSON.stringify({ type: 'cancel_run', run_id: runId }));
+					if (ws.readyState === WebSocket.OPEN) {
+						ws.send(JSON.stringify({ type: 'cancel_run', run_id: runId }));
+					}
 				} catch { /* ignore */ }
 				cleanup();
 			});
@@ -155,7 +174,8 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 				const type = msg['type'] as string;
 
 				if (type === 'component.started') {
-					progress([{ kind: 'markdownContent', content: { value: `\n> ⚙️ _${msg['component_id']}…_\n` } }]);
+					// Backend emits 'component' key (from BaseComponent._ws_emit) — was incorrectly reading 'component_id'
+					progress([{ kind: 'markdownContent', content: { value: `\n> ⚙️ _${msg['component']}…_\n` } }]);
 
 				} else if (type === 'plan.ready') {
 					const fileplan = (msg['file_plan'] as Array<Record<string, string>>) ?? [];
@@ -257,23 +277,34 @@ class OrionChatAgentImplementation implements IChatAgentImplementation {
 
 export class OrionChatAgentContribution extends Disposable implements IWorkbenchContribution {
 	static readonly ID = 'workbench.contrib.orionChatAgent';
+	/** Shared workspace root path, set at construction time and read by OrionChatAgentImplementation.invoke() */
+	static resolvedWorkspaceId: string = 'default';
 
 	constructor(
 		@IChatAgentService private readonly chatAgentService: IChatAgentService,
+		@IWorkspaceContextService workspaceContextService: IWorkspaceContextService,
+		@IMainProcessService mainProcessService: IMainProcessService
 	) {
 		super();
+
+		// Resolve workspace root once at construction — DI-injected service, not hardcoded
+		const folders = workspaceContextService.getWorkspace().folders;
+		if (folders.length > 0) {
+			OrionChatAgentContribution.resolvedWorkspaceId = folders[0].uri.fsPath;
+		}
 
 		this._register(this.chatAgentService.registerAgent(ORION_AGENT_ID, {
 			id: ORION_AGENT_ID,
 			name: 'orion',
 			fullName: 'Orion Pipeline',
 			description: localize2('orionAgent.description', 'Deterministic AI pipeline for OrionIDE').value,
-			extensionId: { value: 'orion-ide.orion-core', _lower: 'orion-ide.orion-core' },
+			extensionId: { value: 'orion.orion-core', _lower: 'orion.orion-core' },
 			extensionVersion: '1.0.0',
 			extensionDisplayName: 'Orion Core',
 			extensionPublisherId: 'orion-ide',
 			publisherDisplayName: 'Orion IDE',
 			isDefault: true,
+			isCore: true,
 			locations: [ChatAgentLocation.Chat],
 			modes: [ChatModeKind.Agent, ChatModeKind.Ask, ChatModeKind.Edit],
 			slashCommands: [
@@ -286,7 +317,7 @@ export class OrionChatAgentContribution extends Disposable implements IWorkbench
 
 		this._register(this.chatAgentService.registerAgentImplementation(
 			ORION_AGENT_ID,
-			new OrionChatAgentImplementation()
+			new OrionChatAgentImplementation(mainProcessService)
 		));
 	}
 }

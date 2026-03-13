@@ -52,6 +52,7 @@ class PipelineRunner:
 
     async def run(self, ctx: PipelineContext, ws_emit) -> PipelineContext:
         """Run the pipeline components in order based on mode."""
+        print('\n>>> PIPELINE EXECUTION STARTED <<<\n')
         logger.info(f"Pipeline started: run_id={ctx.run_id}, mode={ctx.mode.value}")
         await ws_emit(ctx, "pipeline.started", {
             "run_id": ctx.run_id,
@@ -189,7 +190,7 @@ class PipelineRunner:
                 # Assuming session_id might be stored in the context but let's just lookup via sessions if we can,
                 # or just use a dummy logic to restore internal event wait if another endpoint re-polls it.
                 # Here we just re-emit if a session connect occurs anyway, UI will GET /pipeline.
-                result = await db.execute(text("SELECT id FROM pipeline_runs WHERE approval_state='pending' AND approval_expires_at > NOW()"))
+                result = await db.execute(text("SELECT id FROM pipeline_runs WHERE approval_state='pending' AND approval_expires_at > CURRENT_TIMESTAMP"))
                 pending_runs = result.fetchall()
                 
             for row in pending_runs:

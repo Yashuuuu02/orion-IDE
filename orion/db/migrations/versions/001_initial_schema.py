@@ -20,7 +20,9 @@ depends_on = None
 
 def upgrade() -> None:
     # First line
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    bind = op.get_bind()
+    if bind.dialect.name != 'sqlite':
+        op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
     op.create_table('orion_sessions',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
@@ -96,7 +98,9 @@ def upgrade() -> None:
         sa.Column('active', sa.Boolean(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=True)
     )
-    op.execute("ALTER TABLE memory_entries ALTER COLUMN embedding TYPE vector(1536) USING embedding::vector;")
+    bind = op.get_bind()
+    if bind.dialect.name != 'sqlite':
+        op.execute("ALTER TABLE memory_entries ALTER COLUMN embedding TYPE vector(1536) USING embedding::vector;")
 
     op.create_table('cost_tracking',
         sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
