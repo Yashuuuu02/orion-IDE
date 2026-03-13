@@ -26,34 +26,42 @@ class WebSocketSessionManager:
             self._memory_db_path = Path(os.path.expanduser("~/.orion/memories.db"))
 
     async def connect(self, session_id: str, websocket: WebSocket):
-        await websocket.accept()
-        self._active_connections[session_id] = websocket
+        print(f"WS [DEBUG]: Incoming connect request for {session_id}", flush=True)
+        try:
+            await websocket.accept()
+            print(f"WS [DEBUG]: Handshake accepted for {session_id}", flush=True)
+            self._active_connections[session_id] = websocket
 
-        from orion.core.database import AsyncSessionLocal
-        from sqlalchemy import text
-        
-        buffered = []
-        async with AsyncSessionLocal() as db:
-            await db.execute(text(
-                "UPDATE orion_sessions "
-                "SET ws_status='active', ws_connected_at=NOW(), ws_last_seen=NOW() "
-                "WHERE id=:sid"
-            ), {'sid': session_id})
-            await db.commit()
+            from orion.core.database import AsyncSessionLocal
+            from sqlalchemy import text
             
-            result = await db.execute(text(
-                "SELECT event_json FROM ws_event_buffer "
-                "WHERE session_id=:sid ORDER BY created_at ASC"
-            ), {'sid': session_id})
-            buffered = [row[0] for row in result.fetchall()]
+            buffered = []
+            async with AsyncSessionLocal() as db:
+                await db.execute(text(
+                    "UPDATE orion_sessions "
+                    "SET ws_status='active', ws_connected_at=CURRENT_TIMESTAMP, ws_last_seen=CURRENT_TIMESTAMP "
+                    "WHERE id=:sid"
+                ), {'sid': session_id})
+                await db.commit()
+                print(f"WS [DEBUG]: session status updated", flush=True)
+                
+                result = await db.execute(text(
+                    "SELECT event_json FROM ws_event_buffer "
+                    "WHERE session_id=:sid ORDER BY created_at ASC"
+                ), {'sid': session_id})
+                buffered = [row[0] for row in result.fetchall()]
 
-        if buffered:
-            logger.info(f"Replaying {len(buffered)} events for reconnecting session {session_id}")
-            for item in buffered:
-                try:
-                    await websocket.send_text(json.dumps(item) if isinstance(item, dict) else item)
-                except Exception as e:
-                    logger.error(f"Failed to replay event: {e}")
+            if buffered:
+                logger.info(f"Replaying {len(buffered)} events for reconnecting session {session_id}")
+                for item in buffered:
+                    try:
+                        await websocket.send_text(json.dumps(item) if isinstance(item, dict) else item)
+                    except Exception as e:
+                        logger.error(f"Failed to replay event: {e}")
+            print(f"WS [DEBUG]: Connect sequence complete for {session_id}", flush=True)
+        except Exception as e:
+            print(f"WS [ERROR]: CRASH in connect() for {session_id}: {e}", flush=True)
+            raise
 
     def disconnect(self, session_id: str):
         if session_id in self._active_connections:
@@ -63,22 +71,26 @@ class WebSocketSessionManager:
     async def emit(self, session_id: str, event: dict):
         event_str = json.dumps(event)
 
-        from orion.core.database import AsyncSessionLocal
-        from sqlalchemy import text
-        async with AsyncSessionLocal() as db:
-            await db.execute(text(
-                "INSERT INTO ws_event_buffer(session_id, run_id, event_json) VALUES (:sid, :rid, :evt::jsonb)"
-            ), {'sid': session_id, 'rid': event.get('run_id'), 'evt': event_str})
-            
-            await db.execute(text(
-                "DELETE FROM ws_event_buffer WHERE id IN ("
-                "  SELECT id FROM ws_event_buffer "
-                "  WHERE session_id=:sid ORDER BY created_at DESC OFFSET 50"
-                ")"
-            ), {'sid': session_id})
-            await db.commit()
+        # Exhibition Mode: buffer insert is best-effort — never let DB errors crash the WS
+        try:
+            from orion.core.database import AsyncSessionLocal
+            from sqlalchemy import text
+            async with AsyncSessionLocal() as db:
+                await db.execute(text(
+                    "INSERT INTO ws_event_buffer(session_id, run_id, event_json) VALUES (:sid, :rid, :evt)"
+                ), {'sid': session_id, 'rid': event.get('run_id'), 'evt': event_str})
+                
+                await db.execute(text(
+                    "DELETE FROM ws_event_buffer WHERE id NOT IN ("
+                    "  SELECT id FROM ws_event_buffer "
+                    "  WHERE session_id=:sid ORDER BY created_at DESC LIMIT 50"
+                    ")"
+                ), {'sid': session_id})
+                await db.commit()
+        except Exception as db_err:
+            logger.warning(f"Exhibition Mode: event buffer write failed (non-fatal): {db_err}")
 
-        # Send to connected client if present
+        # Send to connected client if present — always attempt even if DB failed
         if session_id in self._active_connections:
             try:
                 await self._active_connections[session_id].send_text(event_str)
@@ -179,7 +191,7 @@ class WebSocketSessionManager:
             from orion.core.database import AsyncSessionLocal
             from sqlalchemy import text
             async with AsyncSessionLocal() as db:
-                await db.execute(text("UPDATE orion_sessions SET tab_state=:state::jsonb WHERE id=:sid"), {'state': json.dumps(state), 'sid': session_id})
+                await db.execute(text("UPDATE orion_sessions SET tab_state=:state WHERE id=:sid"), {'state': json.dumps(state), 'sid': session_id})
                 await db.commit()
 
         elif msg_type == "update_permissions":
@@ -187,7 +199,7 @@ class WebSocketSessionManager:
             from orion.core.database import AsyncSessionLocal
             from sqlalchemy import text
             async with AsyncSessionLocal() as db:
-                await db.execute(text("UPDATE orion_sessions SET permissions=:perms::jsonb WHERE id=:sid"), {'perms': json.dumps(perms), 'sid': session_id})
+                await db.execute(text("UPDATE orion_sessions SET permissions=:perms WHERE id=:sid"), {'perms': json.dumps(perms), 'sid': session_id})
                 await db.commit()
 
         elif msg_type == "add_memory":

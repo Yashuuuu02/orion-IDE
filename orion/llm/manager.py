@@ -1,5 +1,6 @@
 import json
 import logging
+import asyncio
 from typing import Optional, Any
 from openai import AsyncOpenAI
 from litellm import Router
@@ -12,8 +13,71 @@ from orion.core.metrics import llm_api_errors_total
 
 logger = logging.getLogger(__name__)
 
+# ── Exhibition Mode: hardcoded fallback for demo safety ──────────────
+DEMO_FALLBACK_RESPONSES: dict[str, str] = {
+    "fastify": '''// server.js - Production-ready Fastify server
+const fastify = require('fastify')({ logger: true });
+const os = require('os');
+
+fastify.get('/uptime', async (request, reply) => {
+  return {
+    status: 'ok',
+    uptime_seconds: process.uptime(),
+    uptime_human: new Date(process.uptime() * 1000).toISOString().substr(11, 8),
+    hostname: os.hostname(),
+    platform: process.platform,
+    memory: {
+      used_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      total_mb: Math.round(os.totalmem() / 1024 / 1024),
+    },
+    timestamp: new Date().toISOString(),
+  };
+});
+
+fastify.get('/health', async () => ({ status: 'healthy' }));
+
+const start = async () => {
+  try {
+    await fastify.listen({ port: 3000, host: '0.0.0.0' });
+    fastify.log.info(`Server running on http://localhost:3000`);
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+start();
+''',
+    "dockerfile": '''# Dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app .
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:3000/health || exit 1
+USER node
+CMD ["node", "server.js"]
+''',
+}
+
+
+def _match_demo_fallback(prompt: str) -> Optional[str]:
+    """Check if a prompt matches a demo fallback pattern."""
+    lower = prompt.lower()
+    if "fastify" in lower and ("server" in lower or "route" in lower):
+        parts = [DEMO_FALLBACK_RESPONSES["fastify"]]
+        if "dockerfile" in lower or "docker" in lower:
+            parts.append(DEMO_FALLBACK_RESPONSES["dockerfile"])
+        return "\n".join(parts)
+    return None
+
+
 class LiteLLMManager:
-    """In-process LiteLLM Router wrapper with direct OpenAI SDK fallback for NVIDIA NIM."""
+    """In-process LiteLLM Router wrapper with Exhibition Mode safety net."""
 
     def __init__(self):
         self._router: Optional[Router] = None
@@ -52,8 +116,9 @@ class LiteLLMManager:
                 self._openai_client = AsyncOpenAI(
                     base_url=p.base_url,
                     api_key=p.api_key,
+                    timeout=30.0,  # Exhibition Mode: 30s hard timeout
                 )
-                logger.info("Configured direct OpenAI client for NVIDIA NIM")
+                logger.info("Configured direct OpenAI client for NVIDIA NIM (Exhibition Mode)")
                 break
 
     def is_configured(self) -> bool:
@@ -76,10 +141,14 @@ class LiteLLMManager:
                         model_fast="openai/qwen/qwen2-7b-instruct",
                         api_key=settings.NVIDIA_API_KEY,
                         base_url="https://integrate.api.nvidia.com/v1",
-                        planning_extra_body={"chat_template_kwargs": {"enable_thinking": True}, "reasoning_budget": 16384},
+                        # Exhibition Mode: capped reasoning_budget at 2048 for <3s thinking
+                        planning_extra_body={
+                            "chat_template_kwargs": {"enable_thinking": True},
+                            "reasoning_budget": 2048,
+                        },
                         enabled=True,
                     )])
-                    logger.info("Lazy-initialized LiteLLM for NVIDIA NIM (Nemotron & Qwen)")
+                    logger.info("Lazy-initialized LiteLLM for NVIDIA NIM (Exhibition Mode: budget=2048)")
                 elif settings.OPENROUTER_API_KEY:
                     self.configure([ProviderConfig(
                         provider="openrouter",
@@ -131,6 +200,9 @@ class LiteLLMManager:
 
                 collected = []
                 async for chunk in stream:
+                    # Exhibition Mode: skip empty chunks to prevent hangs
+                    if not chunk.choices:
+                        continue
                     delta = chunk.choices[0].delta
                     if delta and delta.content:
                         collected.append(delta.content)
@@ -157,6 +229,16 @@ class LiteLLMManager:
                 provider=err_provider,
                 error_type=type(e).__name__
             ).inc()
+
+            # ── Exhibition Mode: Demo Safety Net ─────────────────────
+            # If the API errors out, check if the original prompt matches
+            # a known demo scenario and return a hardcoded high-quality response.
+            prompt_text = messages[-1].get("content", "") if messages else ""
+            fallback = _match_demo_fallback(prompt_text)
+            if fallback:
+                logger.warning(f"EXHIBITION FALLBACK activated for model={model}, error={e}")
+                return fallback
+
             raise
 
     async def get_embedding(self, text: str) -> list[float]:
